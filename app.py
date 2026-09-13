@@ -173,18 +173,30 @@ def get_productos():
             query += ' AND categoria = ?'
             params.append('Importación')
 
+
+
+
+
+    
     if destacados == 'nacionales':
-        mas_vendidos = ['Keytruda', 'Ozempic', 'Humira', 'Enbrel', 'Remicade',
-                        'Orencia', 'Actemra', 'Cimzia', 'Simponi', 'Xeljanz',
-                        'Olumiant', 'Rinvoq', 'Prolia', 'Mabthera', 'Rituxan', 'Tagrisso']
+        mas_vendidos = [
+            'RoActemra', 'Tocilizumab', 'Simponi', 'Golimumab',
+            'Tagrisso', 'Osimertinib', 'Xeljanz', 'Tofacitinib',
+            'Actilyse', 'Alteplasa', 'Hemlibra', 'Emicizumab',
+            'Higlobin', 'Inmonuglobulina', 'Lilemidol', 'Lenalidomida',
+            'Metalyse', 'Tenecteplasa', 'Mozobil', 'Plerixafor',
+            'Renegy', 'Carboximaltosa Ferrica', 'Revolade', 'Eltrombopag'
+        ]
         condiciones = ' OR '.join(['nombre LIKE ?' for _ in mas_vendidos])
         query += f' AND categoria = ? AND ({condiciones})'
         params.append('Nacional')
         params.extend([f'%{m}%' for m in mas_vendidos])
 
     if destacados == 'importados':
-        mas_vendidos = ['Keytruda', 'Ozempic', 'Humira', 'Enbrel', 'Remicade',
-                        'Orencia', 'Actemra', 'Cimzia', 'Simponi', 'Xeljanz']
+        mas_vendidos = [
+            'Keytruda', 'Ozempic', 'Humira', 'Enbrel', 'Remicade',
+            'Orencia', 'Actemra', 'Cimzia', 'Simponi', 'Xeljanz'
+        ]
         condiciones = ' OR '.join(['nombre LIKE ?' for _ in mas_vendidos])
         query += f' AND categoria = ? AND ({condiciones})'
         params.append('Importación')
