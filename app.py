@@ -168,7 +168,6 @@ def get_productos():
             query += ' AND categoria = ?'
             params.append('Nacional')
             query += ' ORDER BY prioridad DESC, id_producto ASC'
-            query += ' ORDER BY prioridad DESC, id_producto ASC'
         else:
             query += ' AND categoria = ?'
             params.append('Importación')
