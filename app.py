@@ -137,7 +137,6 @@ def get_productos():
     search = request.args.get('search', '')
     pais = request.args.get('pais', '')
     destacados = request.args.get('destacados', '')
-    destacados = request.args.get('destacados', '')
     limit = int(request.args.get('limit', 12))
     offset = int(request.args.get('offset', 0))
 
@@ -171,6 +170,23 @@ def get_productos():
         else:
             query += ' AND categoria = ?'
             params.append('Importación')
+
+    if destacados == 'nacionales':
+        mas_vendidos = ['Keytruda', 'Ozempic', 'Humira', 'Enbrel', 'Remicade',
+                        'Orencia', 'Actemra', 'Cimzia', 'Simponi', 'Xeljanz',
+                        'Olumiant', 'Rinvoq', 'Prolia', 'Mabthera', 'Rituxan', 'Tagrisso']
+        condiciones = ' OR '.join(['nombre LIKE ?' for _ in mas_vendidos])
+        query += f' AND categoria = ? AND ({condiciones})'
+        params.append('Nacional')
+        params.extend([f'%{m}%' for m in mas_vendidos])
+
+    if destacados == 'importados':
+        mas_vendidos = ['Keytruda', 'Ozempic', 'Humira', 'Enbrel', 'Remicade',
+                        'Orencia', 'Actemra', 'Cimzia', 'Simponi', 'Xeljanz']
+        condiciones = ' OR '.join(['nombre LIKE ?' for _ in mas_vendidos])
+        query += f' AND categoria = ? AND ({condiciones})'
+        params.append('Importación')
+        params.extend([f'%{m}%' for m in mas_vendidos])
 
     count_query = query.replace('SELECT *', 'SELECT COUNT(*)')
     cursor.execute(count_query, params)
