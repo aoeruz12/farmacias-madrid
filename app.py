@@ -167,6 +167,7 @@ def get_productos():
         if pais.lower() in ('méxico', 'mexico'):
             query += ' AND categoria = ?'
             params.append('Nacional')
+            query += ' ORDER BY prioridad DESC, id_producto ASC'
         else:
             query += ' AND categoria = ?'
             params.append('Importación')
