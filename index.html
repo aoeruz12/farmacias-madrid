@@ -168,14 +168,22 @@
           <span class="bg-madrid-blue/10 px-3 py-1 rounded-full text-sm">🇲🇽 Nacionales</span>
           <span class="text-xs text-slate-400 font-normal" id="contador-nacionales">(0 productos)</span>
         </h3>
-        <div class="scroll-container" id="productos-nacionales"></div>
+        <div class="relative">
+          <div class="scroll-container" id="productos-nacionales"></div>
+          <button onclick="scrollIzq('productos-nacionales')" class="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 z-10 border border-slate-200 hover:bg-slate-50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+          <button onclick="scrollDer('productos-nacionales')" class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 z-10 border border-slate-200 hover:bg-slate-50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+        </div>
       </div>
       <div>
         <h3 class="text-lg font-bold text-madrid-darkblue mb-2 flex items-center gap-2">
           <span class="bg-amber-100 px-3 py-1 rounded-full text-sm">🌍 Importados</span>
           <span class="text-xs text-slate-400 font-normal" id="contador-importados">(0 variantes)</span>
         </h3>
-        <div class="scroll-container" id="productos-importados"></div>
+        <div class="relative">
+          <div class="scroll-container" id="productos-importados"></div>
+          <button onclick="scrollIzq('productos-importados')" class="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 z-10 border border-slate-200 hover:bg-slate-50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+          <button onclick="scrollDer('productos-importados')" class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 z-10 border border-slate-200 hover:bg-slate-50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+        </div>
       </div>
     </section>
 
@@ -312,6 +320,7 @@
       </div>
       <div id="catalogo-nacional-status" class="text-center text-slate-400 text-sm py-8">Cargando productos nacionales...</div>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="catalogo-nacional-list"></div>
+      <div id="paginacion-nacional" class="flex justify-center items-center gap-4 mt-6"></div>
     </section>
 
     <!-- MAPA + RASTREO -->
@@ -391,6 +400,7 @@
       </div>
       <div id="catalogo-importacion-status" class="text-center text-slate-400 text-sm py-8">Cargando productos importados...</div>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="catalogo-importacion-list"></div>
+      <div id="paginacion-importacion" class="flex justify-center items-center gap-4 mt-6"></div>
     </section>
 
     <!-- LEYENDA LEGAL -->
@@ -587,7 +597,9 @@
     const resp = await fetch('/api/productos?destacados=nacionales&limit=10');
     if (!resp.ok) throw new Error('Error al cargar nacionales');
     const data = await resp.json();
-    const productos = data.productos || [];
+    let productos = data.productos || [];
+    // Eliminar Tagrisso duplicado (>$100,000)
+    productos = productos.filter(p => !(p.nombre && p.nombre.includes('Tagrisso') && (p.precio_venta_mxn || 0) > 100000));
     const cont = document.getElementById('productos-nacionales');
     const contador = document.getElementById('contador-nacionales');
     if (contador) contador.textContent = `(${productos.length} productos)`;
@@ -836,30 +848,34 @@ async function cargarCatalogoNacional() {
   const statusEl = document.getElementById('catalogo-nacional-status');
   try {
     const search = document.getElementById('buscador-nacional')?.value || '';
-    const resp = await fetch(`/api/productos?pais=México&limit=24&search=${encodeURIComponent(search)}`);
+    const offset = (paginaNacional - 1) * POR_PAGINA_NAC;
+    const resp = await fetch(`/api/productos?pais=México&limit=${POR_PAGINA_NAC}&offset=${offset}&search=${encodeURIComponent(search)}`);
     const data = await resp.json();
     document.getElementById('total-nacionales').innerText = `${data.total || 0} Nacionales Disponibles`;
     if(statusEl) statusEl.classList.add('hidden');
     renderTarjetas(data.productos || [], 'catalogo-nacional-list', 'nacional');
+    renderPaginacionNacional(data.total || 0);
     refrescarIconos();
   } catch(e) { console.error('Error nacionales:', e); }
 }
-function buscarNacional() { cargarCatalogoNacional(); }
+function buscarNacional() { paginaNacional = 1; cargarCatalogoNacional(); }
 
 // ============ CATÁLOGO IMPORTACIÓN ============
 async function cargarCatalogoImportacion() {
   const statusEl = document.getElementById('catalogo-importacion-status');
   try {
     const search = document.getElementById('buscador-importacion')?.value || '';
-    const resp = await fetch(`/api/productos?pais=!México&limit=24&search=${encodeURIComponent(search)}`);
+    const offset = (paginaImportacion - 1) * POR_PAGINA_IMP;
+    const resp = await fetch(`/api/productos?pais=!México&limit=${POR_PAGINA_IMP}&offset=${offset}&search=${encodeURIComponent(search)}`);
     const data = await resp.json();
     document.getElementById('total-importados').innerText = `${data.total || 0} Importados Disponibles`;
     if(statusEl) statusEl.classList.add('hidden');
     renderTarjetas(data.productos || [], 'catalogo-importacion-list', 'importado');
+    renderPaginacionImportacion(data.total || 0);
     refrescarIconos();
   } catch(e) { console.error('Error importados:', e); }
 }
-function buscarImportacion() { cargarCatalogoImportacion(); }
+function buscarImportacion() { paginaImportacion = 1; cargarCatalogoImportacion(); }
 
 // ============ RENDER TARJETAS ============
 function renderTarjetas(productos, contenedorId, tipo) {
@@ -1024,6 +1040,57 @@ function buscarEnMapa() {
 
 setTimeout(() => { try { inicializarMapa(); } catch(e) { console.error('Mapa:', e); } }, 2000);
 
+
+
+    // ============ SCROLL MÁS VENDIDOS ============
+    function scrollIzq(id) {
+      const el = document.getElementById(id);
+      if(el) el.scrollBy({ left: -400, behavior: 'smooth' });
+    }
+    function scrollDer(id) {
+      const el = document.getElementById(id);
+      if(el) el.scrollBy({ left: 400, behavior: 'smooth' });
+    }
+
+    // ============ PAGINACIÓN CATÁLOGO NACIONAL ============
+    let paginaNacional = 1;
+    const POR_PAGINA_NAC = 12;
+    function renderPaginacionNacional(total) {
+      const totalPaginas = Math.ceil(total / POR_PAGINA_NAC);
+      const cont = document.getElementById('paginacion-nacional');
+      if(!cont) return;
+      if(totalPaginas <= 1) { cont.innerHTML = ''; return; }
+      cont.innerHTML = `
+        <button onclick="cambiarPaginaNacional(-1)" ${paginaNacional === 1 ? 'disabled' : ''} class="px-4 py-2 rounded-xl bg-white border border-slate-200 disabled:opacity-40 text-xs font-bold shadow-sm">Anterior</button>
+        <span class="text-xs font-bold text-slate-600">Página ${paginaNacional} de ${totalPaginas}</span>
+        <button onclick="cambiarPaginaNacional(1)" ${paginaNacional === totalPaginas ? 'disabled' : ''} class="px-4 py-2 rounded-xl bg-white border border-slate-200 disabled:opacity-40 text-xs font-bold shadow-sm">Siguiente</button>
+      `;
+    }
+    function cambiarPaginaNacional(delta) {
+      paginaNacional += delta;
+      cargarCatalogoNacional();
+      document.getElementById('catalogo-nacional').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ============ PAGINACIÓN CATÁLOGO IMPORTACIÓN ============
+    let paginaImportacion = 1;
+    const POR_PAGINA_IMP = 12;
+    function renderPaginacionImportacion(total) {
+      const totalPaginas = Math.ceil(total / POR_PAGINA_IMP);
+      const cont = document.getElementById('paginacion-importacion');
+      if(!cont) return;
+      if(totalPaginas <= 1) { cont.innerHTML = ''; return; }
+      cont.innerHTML = `
+        <button onclick="cambiarPaginaImportacion(-1)" ${paginaImportacion === 1 ? 'disabled' : ''} class="px-4 py-2 rounded-xl bg-white border border-slate-200 disabled:opacity-40 text-xs font-bold shadow-sm">Anterior</button>
+        <span class="text-xs font-bold text-slate-600">Página ${paginaImportacion} de ${totalPaginas}</span>
+        <button onclick="cambiarPaginaImportacion(1)" ${paginaImportacion === totalPaginas ? 'disabled' : ''} class="px-4 py-2 rounded-xl bg-white border border-slate-200 disabled:opacity-40 text-xs font-bold shadow-sm">Siguiente</button>
+      `;
+    }
+    function cambiarPaginaImportacion(delta) {
+      paginaImportacion += delta;
+      cargarCatalogoImportacion();
+      document.getElementById('catalogo-importacion').scrollIntoView({ behavior: 'smooth' });
+    }
 
     // ============ INIT ============
     window.onload = function() {
