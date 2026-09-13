@@ -17,19 +17,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            madrid: { blue: '#0A398A', darkblue: '#052258', yellow: '#FFC000', yellowhover: '#E5AC00', emerald: '#10B981' }
-          },
-          fontFamily: { sans: ['Inter', 'sans-serif'] }
-        }
-      }
-    }
-  </script>
-
   <style>
     body { font-family: 'Inter', sans-serif; background: #F4F7FC; }
     .product-card { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -534,9 +521,7 @@
         return;
       }
       cont.innerHTML = catalogoFiltrado.map(p => {
-        // Si tiene imagen, usarla; si no, placeholder
         let imgSrc = p.imagen_principal || 'https://placehold.co/400x400/0A398A/FFFFFF?text=Sin+Imagen';
-        // Normalizar ruta: si no empieza con http o /, agregar /
         if (imgSrc && !imgSrc.startsWith('http') && !imgSrc.startsWith('/')) {
           imgSrc = '/' + imgSrc;
         }
@@ -643,7 +628,6 @@ function renderProductosScroll(productos, contenedor) {
     if (imagen && !imagen.startsWith('http') && !imagen.startsWith('/')) {
       imagen = '/' + imagen;
     }
-    // Bandera según país
     const bandera = p.pais_origen === 'India' ? '🇮🇳' : 
                     p.pais_origen === 'China' ? '🇨🇳' : 
                     p.pais_origen === 'México' ? '🇲🇽' : '🌍';
@@ -1016,7 +1000,6 @@ function inicializarMapa() {
     attribution: '© OpenStreetMap', maxZoom: 19
   }).addTo(mapaRastreo);
   
-  // Iconos
   const iconoFarm = (color) => L.divIcon({
     html: `<div style="background:${color};color:white;padding:6px;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(0,0,0,0.3);font-size:16px;">🏥</div>`,
     className: '', iconSize: [36,36], iconAnchor: [18,18]
@@ -1026,7 +1009,6 @@ function inicializarMapa() {
     className: '', iconSize: [40,40], iconAnchor: [20,20]
   });
   
-  // Sucursales reales
   L.marker([20.0805, -98.3628], { icon: iconoFarm('#0A398A') }).addTo(mapaRastreo).bindPopup('<b>🏥 Farmacias Madrid Suc. 21</b><br>21 de Marzo Nte. 406<br>📞 775 320 0224');
   L.marker([20.0840, -98.3655], { icon: iconoFarm('#0A398A') }).addTo(mapaRastreo).bindPopup('<b>🏥 Farmacias Madrid Suc. Lázaro</b><br>Gral. L Cárdenas 107<br>📞 775 320 0224');
   L.marker([20.0808, -98.3660], { icon: iconoFarm('#0A398A') }).addTo(mapaRastreo).bindPopup('<b>🏥 Farmacias Madrid Suc. Caballito</b><br>21 de Marzo Nte. 913<br>📞 775 320 0224');
