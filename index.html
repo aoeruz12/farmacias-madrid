@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farmacias Madrid - Alta Especialidad Médica a tu Alcance</title>
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Farmacias Madrid - Alta Especialidad a tu Alcance" />
+  <meta property="og:description" content="Más de 1,600 medicamentos de alta especialidad con envío seguro en cadena de frío a todo México." />
+
+  <link rel="icon" type="image/png" href="apple-touch-icon.svg" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.svg" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.294.0/dist/umd/lucide.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            madrid: { blue: '#0A398A', darkblue: '#052258', yellow: '#FFC000', yellowhover: '#E5AC00', emerald: '#10B981' }
+          },
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #F4F7FC; }
+    .product-card { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 12px 24px -10px rgba(10, 57, 138, 0.15); }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-thumb { background: #0A398A; border-radius: 10px; }
+    .carrusel-slide { transition: opacity 0.7s ease, transform 0.7s ease; }
+    .carrusel-imagen { object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0; }
+    .faq-question { cursor: pointer; transition: background 0.2s; }
+    .faq-question:hover { background: #f1f5f9; }
+    .faq-answer { display: none; padding: 0.75rem 1.25rem 1.25rem; }
+    .faq-answer.open { display: block; }
+    .chart-container { position: relative; width: 100%; max-width: 650px; margin: auto; height: 320px; }
+    .badge-pulse { animation: pulse-ring 2s infinite; }
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .scroll-container {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      padding: 0.5rem 0.25rem 1rem;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .scroll-container > * {
+      flex: 0 0 160px;
+      scroll-snap-align: start;
+    }
+    @media (min-width: 640px) {
+      .scroll-container > * { flex: 0 0 200px; }
+    }
+    .scroll-container::-webkit-scrollbar { height: 6px; }
+    .scroll-container::-webkit-scrollbar-thumb { background: #0A398A; border-radius: 10px; }
+    .scroll-container::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+  </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="text-slate-800 antialiased flex flex-col min-h-screen">
+
+  <!-- BARRA SUPERIOR -->
+  <div class="bg-madrid-darkblue text-white text-xs py-2 px-4 text-center font-medium flex items-center justify-center gap-2 border-b border-white/10">
+    <span class="inline-flex items-center gap-1 bg-madrid-yellow text-madrid-darkblue font-extrabold px-2 py-0.5 rounded text-[10px]">
+      <i data-lucide="shield-check" class="w-3 h-3"></i> COFEPRIS VERIFICADO
+    </span>
+    <span>🚚 Envíos Refrigerados con Termo Controlado a todo México | Atención Farmacéutica 24/7</span>
+  </div>
+
+  <!-- HEADER -->
+  <header class="bg-madrid-blue sticky top-0 z-40 shadow-lg border-b border-madrid-yellow/20">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      <a href="#" class="flex items-center gap-3 group">
+        <img src="logo.svg" alt="Farmacias Madrid" class="w-12 h-12 rounded-xl shadow group-hover:scale-105 transition-transform object-contain">
+        <div>
+          <h1 class="text-white font-black text-lg md:text-xl leading-tight tracking-tight">FARMACIAS MADRID</h1>
+          <p class="text-madrid-yellow text-xs font-semibold italic -mt-1">Alta especialidad a tu alcance</p>
+        </div>
+      </a>
+      <nav class="hidden lg:flex items-center space-x-6 text-sm font-semibold text-white/90">
+        <a href="#catalogo" class="hover:text-madrid-yellow transition">Catálogo</a>
+        <a href="#receta" class="hover:text-madrid-yellow transition">Cotizar Receta</a>
+        <a href="#calculadora" class="hover:text-madrid-yellow transition">Calculadora Dosis</a>
+        <a href="#rastreo" class="hover:text-madrid-yellow transition">Rastreo Cadena Frío</a>
+        <a href="#eficacia" class="hover:text-madrid-yellow transition">Estudio Prolia®</a>
+        <a href="#faq" class="hover:text-madrid-yellow transition">FAQ</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <button onclick="abrirCarrito()" class="relative bg-white/10 hover:bg-white/20 text-white font-bold p-2.5 rounded-xl flex items-center gap-2 transition border border-white/20">
+          <i data-lucide="shopping-bag" class="w-5 h-5 text-madrid-yellow"></i>
+          <span class="hidden sm:inline text-xs">Cotización</span>
+          <span id="cart-counter" class="bg-madrid-yellow text-madrid-darkblue font-black text-xs px-2 py-0.5 rounded-full">0</span>
+        </button>
+        <a href="https://wa.me/527753200224" target="_blank" class="bg-madrid-yellow hover:bg-madrid-yellowhover text-madrid-darkblue font-bold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition-all shadow-md transform hover:-translate-y-0.5">
+          <i data-lucide="message-circle" class="w-4 h-4"></i> <span class="hidden sm:inline">WhatsApp Directo</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-12">
+
+    <!-- HERO -->
+    <section class="rounded-3xl overflow-hidden shadow-2xl relative">
+      <div class="bg-gradient-to-br from-madrid-darkblue via-madrid-blue to-slate-900 p-8 md:p-14 text-white relative z-10 border-2 border-madrid-yellow/30">
+        <div class="relative z-20 max-w-4xl mx-auto text-center space-y-6">
+          <div class="inline-flex items-center gap-2 bg-white/15 border border-white/20 font-bold text-xs uppercase px-4 py-1.5 rounded-full backdrop-blur-sm text-madrid-yellow">
+            <i data-lucide="snowflake" class="w-4 h-4 text-cyan-300"></i>
+            <span>Logística Especializada en Cadena de Frío (2°C - 8°C)</span>
+          </div>
+          <h1 class="text-4xl md:text-6xl font-black leading-tight tracking-tight">
+            Más de <span class="text-madrid-yellow">1,600</span> nacionales<br />
+            y <span class="text-madrid-yellow">17,600</span> de exportación<br />
+            <span class="text-2xl md:text-4xl font-bold text-slate-100">Medicamentos de Alta Especialidad</span>
+          </h1>
+          <p class="text-slate-200 text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
+            Expertos en distribución oncológica, biotecnológica, inmunológica y tratamiento de salud ósea como <strong class="text-white underline decoration-madrid-yellow decoration-2">Prolia® (Denosumab 60mg)</strong>.
+          </p>
+          <div class="relative max-w-2xl mx-auto pt-2">
+            <i data-lucide="search" class="w-5 h-5 absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input id="buscador-hero" type="text"
+                   placeholder="Buscar por marca o sustancia: Prolia, Keytruda, Dupixent, Denosumab..."
+                   oninput="buscarDesdeHero()"
+                   class="w-full pl-14 pr-6 py-4 rounded-2xl border-0 bg-white text-slate-800 focus:outline-none focus:ring-4 focus:ring-madrid-yellow/60 text-base shadow-2xl placeholder:text-slate-400 font-medium" />
+          </div>
+          <div class="flex flex-wrap justify-center gap-2 text-xs font-semibold text-white/90 pt-2">
+            <button onclick="filtrarPorSustancia('Salud Ósea')" class="bg-white/10 hover:bg-white/20 px-3.5 py-1.5 rounded-full border border-white/15 transition">🦴 Salud Ósea</button>
+            <button onclick="filtrarPorSustancia('Oncología')" class="bg-white/10 hover:bg-white/20 px-3.5 py-1.5 rounded-full border border-white/15 transition">💉 Oncología</button>
+            <button onclick="filtrarPorSustancia('Biotecnología')" class="bg-white/10 hover:bg-white/20 px-3.5 py-1.5 rounded-full border border-white/15 transition">🧬 Biotecnología</button>
+            <button onclick="filtrarPorSustancia('Reumatología')" class="bg-white/10 hover:bg-white/20 px-3.5 py-1.5 rounded-full border border-white/15 transition">🧪 Reumatología</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARRUSEL -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-2xl font-black text-madrid-blue">Campañas Destacadas & Promociones</h2>
+          <p class="text-xs text-slate-500">Haz clic en cualquier banner para consultar disponibilidad inmediata</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="moverCarrusel(-1)" class="bg-white hover:bg-slate-100 p-2 rounded-xl shadow border border-slate-200 text-madrid-blue">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+          </button>
+          <button onclick="moverCarrusel(1)" class="bg-white hover:bg-slate-100 p-2 rounded-xl shadow border border-slate-200 text-madrid-blue">
+            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+      <div class="relative rounded-3xl overflow-hidden shadow-xl bg-slate-900" style="height: 320px;">
+        <div id="carrusel-ofertas" class="w-full h-full relative"></div>
+        <div id="carrusel-dots" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2.5 z-20"></div>
+      </div>
+    </section>
+
+    <!-- PRODUCTOS MÁS VENDIDOS -->
+    <section class="mb-10">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-black text-madrid-blue">Productos más vendidos</h2>
+        <a href="#catalogo" class="text-sm font-semibold text-madrid-blue hover:underline">Ver todos →</a>
+      </div>
+      <div class="mb-6">
+        <h3 class="text-lg font-bold text-madrid-darkblue mb-2 flex items-center gap-2">
+          <span class="bg-madrid-blue/10 px-3 py-1 rounded-full text-sm">🇲🇽 Nacionales</span>
+          <span class="text-xs text-slate-400 font-normal" id="contador-nacionales">(0 productos)</span>
+        </h3>
+        <div class="scroll-container" id="productos-nacionales"></div>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-madrid-darkblue mb-2 flex items-center gap-2">
+          <span class="bg-amber-100 px-3 py-1 rounded-full text-sm">🌍 Importados</span>
+          <span class="text-xs text-slate-400 font-normal" id="contador-importados">(0 variantes)</span>
+        </h3>
+        <div class="scroll-container" id="productos-importados"></div>
+      </div>
+    </section>
+
+    <!-- VENTAJAS -->
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-5">
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition flex items-center gap-4">
+        <div class="bg-blue-50 rounded-2xl p-3.5 text-madrid-blue"><i data-lucide="snowflake" class="w-7 h-7"></i></div>
+        <div><p class="font-black text-madrid-blue text-sm">Monitoreo Térmico</p><p class="text-xs text-slate-500">Termómetros con registro digital en caja</p></div>
+      </div>
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition flex items-center gap-4">
+        <div class="bg-emerald-50 rounded-2xl p-3.5 text-emerald-600"><i data-lucide="badge-check" class="w-7 h-7"></i></div>
+        <div><p class="font-black text-madrid-blue text-sm">100% Originales</p><p class="text-xs text-slate-500">Directo de laboratorios autorizados</p></div>
+      </div>
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition flex items-center gap-4">
+        <div class="bg-amber-50 rounded-2xl p-3.5 text-amber-600"><i data-lucide="truck" class="w-7 h-7"></i></div>
+        <div><p class="font-black text-madrid-blue text-sm">Entrega Prioritaria</p><p class="text-xs text-slate-500">Mismo día en CDMX y 24h a todo México</p></div>
+      </div>
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition flex items-center gap-4">
+        <div class="bg-purple-50 rounded-2xl p-3.5 text-purple-600"><i data-lucide="headphones" class="w-7 h-7"></i></div>
+        <div><p class="font-black text-madrid-blue text-sm">Atención Personalizada</p><p class="text-xs text-slate-500">Orientación de farmacéuticos titulados</p></div>
+      </div>
+    </section>
+
+    <!-- COTIZAR RECETA -->
+    <section id="receta" class="bg-white rounded-3xl p-6 md:p-10 border border-slate-200 shadow-sm">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-6 space-y-4">
+          <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-flex items-center gap-1">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Cotización Rápida
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900">¿Tienes tu Receta Médica?</h2>
+          <p class="text-slate-600 text-sm leading-relaxed">Sube la fotografía de tu receta o describe los medicamentos que requieres. Nuestro equipo farmacéutico revisará la disponibilidad, precio especial y tiempos de entrega de inmediato.</p>
+          <ul class="space-y-2 text-xs font-semibold text-slate-700">
+            <li class="flex items-center gap-2"><i data-lucide="check-circle2" class="w-4 h-4 text-emerald-500"></i> Validación de lote y caducidad garantizada</li>
+            <li class="flex items-center gap-2"><i data-lucide="check-circle2" class="w-4 h-4 text-emerald-500"></i> Asesoría sobre programas de apoyo a pacientes</li>
+            <li class="flex items-center gap-2"><i data-lucide="check-circle2" class="w-4 h-4 text-emerald-500"></i> Facturación fiscal para reembolsos de seguros</li>
+          </ul>
+        </div>
+        <div class="lg:col-span-6 bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
+          <div><label class="block text-xs font-bold text-slate-700 mb-1">Nombre Completo del Paciente:</label><input type="text" id="rx-nombre" placeholder="Ej. Dra. María González / Juan Pérez" class="w-full p-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-madrid-blue focus:outline-none"></div>
+          <div><label class="block text-xs font-bold text-slate-700 mb-1">Medicamentos requeridos o Diagnóstico:</label><textarea id="rx-detalles" rows="3" placeholder="Ej. Prolia 60mg (1 dosis), Caltrate 600+D (1 caja)" class="w-full p-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-madrid-blue focus:outline-none"></textarea></div>
+          <div><label class="block text-xs font-bold text-slate-700 mb-1">Ciudad de Entrega:</label><input type="text" id="rx-ciudad" placeholder="Ej. Ciudad de México, Guadalajara, Monterrey, Tulancingo..." class="w-full p-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-madrid-blue focus:outline-none"></div>
+          <button onclick="enviarCotizacionReceta()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
+            <i data-lucide="send" class="w-4 h-4"></i> Enviar Receta por WhatsApp
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CALCULADORA PROLIA -->
+    <section id="calculadora" class="bg-gradient-to-r from-madrid-darkblue to-madrid-blue text-white rounded-3xl p-6 md:p-10 shadow-xl">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-6 space-y-4">
+          <span class="inline-block px-3.5 py-1 rounded-full text-xs font-bold bg-madrid-yellow text-madrid-darkblue uppercase tracking-wide">🗓️ Seguimiento de Tratamiento</span>
+          <h2 class="text-2xl sm:text-3xl font-black">Calculadora de Próxima Dosis de Prolia®</h2>
+          <p class="text-sm text-slate-200 leading-relaxed">Prolia® (Denosumab 60 mg) requiere una administración subcutánea estricta cada 6 meses. Mantener el intervalo exacto protege la masa ósea acumulada.</p>
+          <div class="bg-white/10 p-4 rounded-xl border border-white/15 text-xs space-y-1.5 text-slate-200">
+            <p class="font-bold text-madrid-yellow">💡 Consejo para el paciente:</p>
+            <p>Acompaña tu tratamiento con la dosis diaria prescrita de Calcio y Vitamina D3. Nunca suspendas la aplicación sin consultar a tu médico especialista.</p>
+          </div>
+        </div>
+        <div class="lg:col-span-6 bg-white text-slate-800 p-6 sm:p-8 rounded-2xl shadow-lg space-y-4">
+          <h3 class="text-lg font-bold text-slate-900 border-b pb-2">Programar Recordatorio Subcutáneo</h3>
+          <div><label class="block text-xs font-bold text-slate-700 mb-1">Fecha de la Última Inyección Aplicada:</label><input type="date" id="lastDoseDate" class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-madrid-blue focus:outline-none"></div>
+          <button onclick="calculateNextDose()" class="w-full bg-madrid-blue hover:bg-madrid-darkblue text-white font-bold py-3 rounded-xl text-sm transition shadow">Calcular Fecha de Siguiente Aplicación</button>
+          <div id="calculatorResult" class="hidden mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl space-y-3 text-center">
+            <p class="text-xs text-blue-900 font-bold uppercase tracking-wider">Fecha Recomendada de Administración:</p>
+            <p id="nextDateDisplay" class="text-2xl font-black text-madrid-blue"></p>
+            <div class="flex gap-2 justify-center pt-1">
+              <button onclick="descargarICS()" class="bg-madrid-yellow hover:bg-madrid-yellowhover text-madrid-darkblue font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 shadow"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> Descargar Recordatorio</button>
+              <button onclick="agendarRecordatorioWhatsApp()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 shadow"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Agendar con Farmacia</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RASTREO -->
+    <section id="rastreo" class="bg-white rounded-3xl p-6 md:p-10 border border-slate-200 shadow-sm space-y-6">
+      <div class="max-w-3xl mx-auto text-center space-y-2">
+        <span class="text-xs font-bold text-cyan-700 bg-cyan-50 px-3 py-1 rounded-full uppercase tracking-wider border border-cyan-200">❄️ Control Térmico en Tiempo Real</span>
+        <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Rastreador de Cadena de Frío</h2>
+        <p class="text-xs sm:text-sm text-slate-600">Ingresa tu número de guía de Farmacias Madrid para verificar la temperatura del empaque termo-sensible durante el trayecto.</p>
+      </div>
+      <div class="max-w-xl mx-auto flex gap-3">
+        <input type="text" id="tracking-input" value="FM-2026-8921" placeholder="Ej. FM-2026-8921" class="flex-1 p-3.5 rounded-xl border border-slate-300 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-madrid-blue">
+        <button onclick="simularRastreo()" class="bg-madrid-blue hover:bg-madrid-darkblue text-white font-bold px-6 py-3.5 rounded-xl text-sm transition shadow">Consultar</button>
+      </div>
+      <div id="tracking-result" class="max-w-2xl mx-auto bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+          <div><p class="text-xs text-slate-400 font-bold uppercase">Guía Activa</p><p class="font-mono font-bold text-slate-800 text-sm">FM-2026-8921</p></div>
+          <div class="text-right"><span class="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full"><span class="w-2 h-2 rounded-full bg-emerald-500 badge-pulse"></span> Temperatura Segura: 4.2 °C</span></div>
+        </div>
+        <div class="space-y-3">
+          <div class="flex items-start gap-3"><div class="bg-emerald-500 text-white p-1 rounded-full mt-0.5"><i data-lucide="check" class="w-3.5 h-3.5"></i></div><div><p class="text-xs font-bold text-slate-800">Preparación en Laboratorio Central (CDMX)</p><p class="text-[11px] text-slate-400">Inspección de lote y empaque con gel congelado acumulador.</p></div></div>
+          <div class="flex items-start gap-3"><div class="bg-emerald-500 text-white p-1 rounded-full mt-0.5"><i data-lucide="check" class="w-3.5 h-3.5"></i></div><div><p class="text-xs font-bold text-slate-800">En Tránsito en Unidad Especializada Refrigerada</p><p class="text-[11px] text-slate-400">Sensor de registro térmico continuo validado en 3.8°C a 5.1°C.</p></div></div>
+          <div class="flex items-start gap-3"><div class="bg-amber-500 text-white p-1 rounded-full mt-0.5"><i data-lucide="truck" class="w-3.5 h-3.5"></i></div><div><p class="text-xs font-bold text-slate-800">En Camino a Domicilio del Paciente</p><p class="text-[11px] text-slate-400">Estimado de entrega en ventana horaria prioritaria.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ESTUDIO PROLIA -->
+    <section id="eficacia" class="bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm space-y-8">
+      <div class="text-center max-w-3xl mx-auto space-y-3">
+        <span class="text-xs font-bold uppercase tracking-wider text-madrid-blue bg-blue-50 px-3 py-1 rounded-full">Evidencia Científica - Estudio FREEDOM</span>
+        <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Eficacia Clínica Comprobada de Prolia®</h2>
+        <p class="text-sm text-slate-600">Resultados de reducción en el riesgo relativo de fracturas osteoporóticas tras 3 años de tratamiento subcutáneo continuo con Denosumab 60 mg.</p>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-7 flex justify-center"><div class="chart-container"><canvas id="efficacyChart"></canvas></div></div>
+        <div class="lg:col-span-5 space-y-4 text-sm text-slate-600">
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1"><h4 class="font-bold text-madrid-blue text-base">🟢 Reducción Vertebral: 68%</h4><p class="text-xs">Disminución sustancial en la aparición de nuevas fracturas vertebrales en comparación con placebo.</p></div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1"><h4 class="font-bold text-amber-600 text-base">🟡 Reducción de Cadera: 40%</h4><p class="text-xs">Protección crucial en regiones de alto riesgo femoral y movilidad articular.</p></div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1"><h4 class="font-bold text-emerald-600 text-base">🟣 Reducción No Vertebral: 20%</h4><p class="text-xs">Reducción significativa de fracturas esqueléticas periféricas.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CATÁLOGO NACIONAL -->
+    <section id="catalogo-nacional" class="space-y-6">
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-black text-madrid-blue">🇲🇽 Catálogo Nacional</h2>
+          <p class="text-sm text-emerald-600 font-bold flex items-center gap-2 mt-1"><i data-lucide="plane" class="w-4 h-4"></i> Pídelo hoy, lo tienes mañana</p>
+          <p class="text-xs text-slate-500 mt-1">Medicamentos de alta especialidad disponibles en México</p>
+        </div>
+        <span id="total-nacionales" class="text-xs font-bold bg-white px-4 py-2 rounded-xl border border-slate-200 text-slate-700 shadow-sm">Cargando...</span>
+      </div>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input id="buscador-nacional" type="text" placeholder="Buscar en nacionales..." oninput="buscarNacional()" class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-madrid-blue text-sm" />
+        </div>
+      </div>
+      <div id="catalogo-nacional-status" class="text-center text-slate-400 text-sm py-8">Cargando productos nacionales...</div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="catalogo-nacional-list"></div>
+    </section>
+
+    <!-- MAPA + RASTREO -->
+    <section id="rastreo-paqueteria" class="bg-gradient-to-br from-slate-900 via-madrid-darkblue to-slate-900 rounded-3xl p-6 md:p-10 text-white shadow-2xl space-y-6">
+      <div class="text-center">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-cyan-400 text-slate-900 uppercase tracking-wide">
+          <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Rastreo en Tiempo Real
+        </span>
+        <h2 class="text-3xl font-black mt-3">📍 Nuestras Sucursales y Rastreo de tu Paquete</h2>
+        <p class="text-sm text-slate-300 mt-2 max-w-2xl mx-auto">Ingresa tu guía y mira en el mapa dónde va tu medicamento. Conoce nuestras sucursales certificadas.</p>
+      </div>
+
+      <div class="max-w-2xl mx-auto">
+        <div class="flex gap-3">
+          <input type="text" id="guia-mapa" placeholder="FM-2026-8921" value="FM-2026-8921" class="flex-1 p-4 rounded-xl border-0 bg-white text-slate-800 font-mono text-sm font-bold">
+          <button onclick="buscarEnMapa()" class="bg-cyan-400 hover:bg-cyan-300 text-slate-900 font-bold px-6 py-4 rounded-xl text-sm transition flex items-center gap-2">
+            <i data-lucide="search" class="w-4 h-4"></i> Rastrear
+          </button>
+        </div>
+      </div>
+
+      <div id="mapa-rastreo" class="w-full h-96 rounded-2xl border-2 border-cyan-400/30 shadow-xl overflow-hidden"></div>
+
+      <div id="info-paquete" class="max-w-3xl mx-auto bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-white/20 pb-3">
+          <div>
+            <p class="text-xs text-slate-400 font-bold uppercase">Guía Activa</p>
+            <p class="font-mono font-bold text-cyan-300 text-lg">FM-2026-8921</p>
+          </div>
+          <span class="inline-flex items-center gap-1.5 bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-full">
+            <span class="w-2 h-2 rounded-full bg-white badge-pulse"></span> Temperatura Segura: 4.2 °C
+          </span>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+          <div class="bg-emerald-500/20 border border-emerald-400/40 rounded-xl p-3">
+            <i data-lucide="package-check" class="w-6 h-6 mx-auto mb-1 text-emerald-300"></i>
+            <p class="text-xs font-bold">Preparado</p>
+          </div>
+          <div class="bg-emerald-500/20 border border-emerald-400/40 rounded-xl p-3">
+            <i data-lucide="plane" class="w-6 h-6 mx-auto mb-1 text-emerald-300"></i>
+            <p class="text-xs font-bold">En Vuelo</p>
+          </div>
+          <div class="bg-amber-500/20 border border-amber-400/40 rounded-xl p-3">
+            <i data-lucide="truck" class="w-6 h-6 mx-auto mb-1 text-amber-300"></i>
+            <p class="text-xs font-bold">En Reparto</p>
+          </div>
+          <div class="bg-slate-500/20 border border-slate-400/40 rounded-xl p-3">
+            <i data-lucide="home" class="w-6 h-6 mx-auto mb-1 text-slate-300"></i>
+            <p class="text-xs font-bold">Por Entregar</p>
+          </div>
+        </div>
+        <div class="bg-emerald-500/10 border border-emerald-400/30 rounded-xl p-4 flex items-start gap-3">
+          <i data-lucide="shield-check" class="w-6 h-6 text-emerald-400 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <p class="font-bold text-emerald-300 text-sm">Farmacias Madrid Certificada</p>
+            <p class="text-xs text-slate-300">Cumplimos NOM-059-SSA1 y COFEPRIS. Envíos con cadena de frío certificada de 2°C a 8°C.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CATÁLOGO IMPORTACIÓN -->
+    <section id="catalogo-importacion" class="space-y-6">
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-black text-madrid-blue">🇦🇪🇨🇳🇹🇷🇨🇦🇺🇸🇮🇳🇧🇩 Catálogo Importación</h2>
+          <p class="text-sm text-amber-600 font-bold flex items-center gap-2 mt-1"><i data-lucide="package" class="w-4 h-4"></i> Contamos con stock de algunas fórmulas <span class="text-lg">✈️🚢</span></p>
+          <p class="text-xs text-slate-500 mt-1">Dubai · China · Turquía · Canadá · USA · India · Bangladesh</p>
+        </div>
+        <span id="total-importados" class="text-xs font-bold bg-white px-4 py-2 rounded-xl border border-slate-200 text-slate-700 shadow-sm">Cargando...</span>
+      </div>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input id="buscador-importacion" type="text" placeholder="Buscar en importados..." oninput="buscarImportacion()" class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-madrid-blue text-sm" />
+        </div>
+      </div>
+      <div id="catalogo-importacion-status" class="text-center text-slate-400 text-sm py-8">Cargando productos importados...</div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="catalogo-importacion-list"></div>
+    </section>
+
+    <!-- LEYENDA LEGAL -->
+    <section class="bg-yellow-50 border-4 border-dashed border-yellow-400 rounded-3xl p-6 md:p-8 shadow-lg">
+      <div class="flex items-start gap-4">
+        <div class="bg-yellow-400 text-yellow-900 rounded-full p-3 flex-shrink-0">
+          <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+        </div>
+        <div class="space-y-3">
+          <h3 class="text-xl font-black text-yellow-900">⚠️ IMPORTANTE — Política de Anticipos y Devoluciones</h3>
+          <ul class="space-y-2 text-sm text-slate-800 font-medium">
+            <li class="flex items-start gap-2"><span class="text-yellow-600 font-black">✈️ AVÍÓN:</span> Pago total al confirmar. Entrega máxima: <strong>2 días</strong>.</li>
+            <li class="flex items-start gap-2"><span class="text-amber-700 font-black">🚢 BARCO:</span> Anticipo del <strong>50%</strong>. Al llegar a nuestra farmacia, el cliente tiene <strong>3 días</strong> para liquidar el 50% restante. El envío local SIEMPRE es por avión.</li>
+            <li class="flex items-start gap-2"><span class="text-red-600 font-black">🛡️ DEVOLUCIÓN:</span> Pueden surgir contratiempos aduanales. Si Farmacias Madrid no entrega en el tiempo máximo prometido, el anticipo se devuelve al <strong>100%</strong>.</li>
+            <li class="flex items-start gap-2"><span class="text-blue-700 font-black">🇲🇽 NACIONALES:</span> Se pueden apartar, pero no se envían hasta estar 100% liquidados.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-10">
+      <h2 class="text-2xl font-black text-madrid-blue mb-6 text-center">Preguntas Frecuentes</h2>
+      <div class="max-w-3xl mx-auto divide-y divide-slate-200">
+        <div class="py-3"><div class="faq-question flex justify-between items-center py-3 font-semibold text-madrid-blue" onclick="toggleFAQ(this)"><span>¿Cómo aseguran la cadena de frío para medicamentos de refrigeración como Prolia®?</span><i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform duration-200"></i></div><div class="faq-answer text-sm text-slate-600">Utilizamos hieleras térmicas de alta densidad con gel congelado acumulador y registradores térmicos continuos que aseguran una temperatura ininterrumpida entre 2°C y 8°C durante todo el traslado.</div></div>
+        <div class="py-3"><div class="faq-question flex justify-between items-center py-3 font-semibold text-madrid-blue" onclick="toggleFAQ(this)"><span>¿Es indispensable presentar receta médica?</span><i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform duration-200"></i></div><div class="faq-answer text-sm text-slate-600">Sí. Para garantizar el uso racional y la seguridad del paciente, todo medicamento biológico, oncológico o de alta especialidad requiere receta médica vigente expedida por un médico certificado.</div></div>
+        <div class="py-3"><div class="faq-question flex justify-between items-center py-3 font-semibold text-madrid-blue" onclick="toggleFAQ(this)"><span>¿Emiten factura para reembolso con Seguros de Gastos Médicos Mayores?</span><i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform duration-200"></i></div><div class="faq-answer text-sm text-slate-600">Totalmente. Expedimos factura fiscal CFDI 4.0 desglosada con todos los datos necesarios para tu aseguradora o institución médica.</div></div>
+        <div class="py-3"><div class="faq-question flex justify-between items-center py-3 font-semibold text-madrid-blue" onclick="toggleFAQ(this)"><span>¿Cuáles son los métodos de pago aceptados?</span><i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform duration-200"></i></div><div class="faq-answer text-sm text-slate-600">Aceptamos transferencias bancarias SPEI, tarjetas de crédito/débito (Visa, Mastercard, American Express) y pago contra entrega en entregas locales coordinadas.</div></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-madrid-darkblue text-white mt-16 border-t-4 border-madrid-yellow">
+    <div class="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div class="space-y-3"><div class="flex items-center gap-2"><img src="logo.svg" alt="Farmacias Madrid" class="w-8 h-8 rounded-lg object-contain"><h3 class="font-black text-madrid-yellow text-lg">FARMACIAS MADRID</h3></div><p class="text-xs text-slate-300 leading-relaxed">Especialistas en la provisión de medicamentos biotecnológicos y de alta especialidad médica. Compromiso total con la salud de nuestros pacientes.</p></div>
+      <div><h4 class="font-bold text-white text-sm mb-3 text-madrid-yellow">Atención Directa</h4><p class="text-xs text-slate-300 flex items-center gap-2 mb-2"><i data-lucide="phone" class="w-4 h-4 text-madrid-yellow"></i> +52 77 5320 0224</p><p class="text-xs text-slate-300 flex items-center gap-2 mb-2"><i data-lucide="mail" class="w-4 h-4 text-madrid-yellow"></i> contacto@farmaciasmadrid.mx</p><p class="text-xs text-slate-300 flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-madrid-yellow"></i> Cobertura Nacional en México</p></div>
+      <div><h4 class="font-bold text-white text-sm mb-3 text-madrid-yellow">Horarios de Atención</h4><p class="text-xs text-slate-300 mb-1">Lunes a Viernes: 8:00 hrs - 20:00 hrs</p><p class="text-xs text-slate-300 mb-1">Sábados: 9:00 hrs - 15:00 hrs</p><p class="text-xs text-slate-300">Urgencias por WhatsApp: 24 Horas</p></div>
+      <div><h4 class="font-bold text-white text-sm mb-3 text-madrid-yellow">Garantía de Calidad</h4><p class="text-xs text-slate-300 leading-relaxed">Cumplimiento riguroso de la NOM-059-SSA1 sobre buenas prácticas de fabricación y distribución de medicamentos.</p></div>
+    </div>
+    <div class="border-t border-white/10 text-center text-xs text-slate-400 py-6">&copy; 2026 Farmacias Madrid. Todos los derechos reservados.</div>
+  </footer>
+
+  <!-- MODALES Y ELEMENTOS FLOTANTES -->
+  <div id="modal-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4"><div id="modal-content" class="bg-white rounded-3xl max-w-2xl w-full overflow-y-auto max-h-[90vh] shadow-2xl relative"></div></div>
+  <div id="cart-drawer-overlay" class="fixed inset-0 bg-black/50 z-50 hidden" onclick="cerrarCarrito()"></div>
+  <div id="cart-drawer" class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="p-5 bg-madrid-blue text-white flex items-center justify-between"><div class="flex items-center gap-2"><i data-lucide="shopping-bag" class="w-5 h-5 text-madrid-yellow"></i><h3 class="font-black text-lg">Mi Cotización</h3></div><button onclick="cerrarCarrito()" class="text-white/80 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+    <div id="cart-items-container" class="p-5 flex-1 overflow-y-auto space-y-4"></div>
+    <div class="p-5 border-t border-slate-200 bg-slate-50 space-y-3">
+      <div class="flex justify-between font-bold text-slate-800 text-base"><span>Total Estimado:</span><span id="cart-total-display" class="text-emerald-600 font-black">$0.00 MXN</span></div>
+      <p class="text-[11px] text-slate-500">*El precio final puede incluir promociones de laboratorio o apoyo a pacientes al presentar tu receta.</p>
+      <button onclick="enviarCotizaciónCarrito()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg transition"><i data-lucide="message-circle" class="w-5 h-5"></i> Enviar Pedido a WhatsApp</button>
+    </div>
+  </div>
+  <div id="custom-alert" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4"><div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl transform transition-all text-center space-y-4 border border-slate-100"><div class="w-16 h-16 bg-madrid-yellow rounded-full flex items-center justify-center mx-auto text-madrid-darkblue shadow-inner"><i data-lucide="info" class="w-8 h-8"></i></div><h3 id="alert-title" class="text-xl font-black text-madrid-darkblue">Atención</h3><p id="alert-message" class="text-sm text-slate-600"></p><button onclick="cerrarMensaje()" class="w-full bg-madrid-blue hover:bg-madrid-darkblue text-white font-bold py-3 rounded-xl transition shadow">Entendido</button></div></div>
+  <a href="https://wa.me/527753200224" target="_blank" class="fixed bottom-6 right-6 z-40 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-2xl transition-all transform hover:scale-110"><i data-lucide="message-circle" class="w-7 h-7"></i></a>
+
+  <script>
+    const TEL_WHATSAPP = "527753200224";
+    const OFERTAS = [
+      { imagen: "https://placehold.co/1200x400/0A398A/FFFFFF?text=Promoción+Prolia+Disponibilidad+Inmediata", link: "https://wa.me/527753200224?text=" + encodeURIComponent("¡Hola Farmacias Madrid! 👋 Me interesa Prolia® (Denosumab) 60 mg/mL. ¿Tienen disponibilidad?") },
+      { imagen: "https://placehold.co/1200x400/052258/FFC000?text=Descuento+Especial+Tratamiento+Anual", link: "https://wa.me/527753200224?text=" + encodeURIComponent("¡Hola Farmacias Madrid! 👋 Quisiera consultar la promoción especial de Prolia® 60 mg.") },
+      { imagen: "https://placehold.co/1200x400/10B981/FFFFFF?text=Salud+Ósea+Integral+Asesoría+Gratuita", link: "https://wa.me/527753200224?text=" + encodeURIComponent("¡Hola Farmacias Madrid! 👋 Deseo información sobre la salud ósea y Prolia®.") },
+      { imagen: "https://placehold.co/1200x400/0A398A/FFC000?text=Agenda+tu+Aplicación+Subcutánea", link: "https://wa.me/527753200224?text=" + encodeURIComponent("¡Hola Farmacias Madrid! 👋 Me gustaría agendar la aplicación de Prolia®.") },
+      { imagen: "https://placehold.co/1200x400/052258/FFFFFF?text=Envíos+Refrigerados+a+Todo+México", link: "https://wa.me/527753200224?text=" + encodeURIComponent("¡Hola Farmacias Madrid! 👋 ¿Tienen envíos refrigerados a mi ciudad?") }
+    ];
+    let indiceCarrusel = 0;
+    function renderCarrusel() {
+      const cont = document.getElementById('carrusel-ofertas');
+      const dots = document.getElementById('carrusel-dots');
+      if(!cont || !dots) return;
+      cont.innerHTML = OFERTAS.map((o, i) => `<a href="${o.link}" target="_blank" class="carrusel-slide absolute inset-0 block ${i === indiceCarrusel ? 'opacity-100 z-10' : 'opacity-0 z-0'}"><img src="${o.imagen}" alt="Promoción Prolia Farmacias Madrid" class="carrusel-imagen" /></a>`).join('');
+      dots.innerHTML = OFERTAS.map((_, i) => `<button onclick="irACarrusel(${i})" class="w-3 h-3 rounded-full ${i === indiceCarrusel ? 'bg-madrid-yellow scale-125' : 'bg-white/40'} transition"></button>`).join('');
+    }
+    function moverCarrusel(delta) { indiceCarrusel = (indiceCarrusel + delta + OFERTAS.length) % OFERTAS.length; renderCarrusel(); }
+    function irACarrusel(i) { indiceCarrusel = i; renderCarrusel(); }
+    setInterval(() => moverCarrusel(1), 6000);
+
+// ============ CATÁLOGO CON API ============
+    let catalogo = [];
+    let catalogoFiltrado = [];
+    let categoriaActual = 'Todas';
+    let pagina = 1;
+    const POR_PAGINA = 12;
+    let carrito = [];
+
+    function buildApiUrl() {
+      const search = document.getElementById('buscador')?.value || '';
+      const params = new URLSearchParams();
+      params.append('limit', POR_PAGINA);
+      params.append('offset', (pagina-1)*POR_PAGINA);
+      if (categoriaActual && categoriaActual.toLowerCase() !== 'todas') {
+        params.append('categoria', categoriaActual);
+      }
+      if (search) {
+        params.append('search', search);
+      }
+      return `/api/productos?${params.toString()}`;
+    }
+
+    async function cargarCatalogo() {
+      const statusEl = document.getElementById('catalogo-status');
+      try {
+        const url = buildApiUrl();
+        const resp = await fetch(url);
+        const data = await resp.json();
+        catalogo = data.productos || [];
+        const total = data.total || 0;
+        document.getElementById('total-productos').innerText = `${total} Medicamentos Disponibles`;
+        catalogoFiltrado = catalogo;
+        if(statusEl) statusEl.classList.add('hidden');
+        renderCatalogo();
+        renderPaginacion(total);
+        refrescarIconos();
+      } catch(e) {
+        console.error('Error:', e);
+        if(statusEl) statusEl.innerText = '⚠️ Error al cargar productos.';
+      }
+    }
+
+    function renderCatalogo() {
+      const cont = document.getElementById('catalogo-list');
+      if(!cont) return;
+      if(catalogoFiltrado.length === 0) {
+        cont.innerHTML = `<div class="col-span-full text-center text-slate-400 py-16 bg-white rounded-3xl border border-slate-200">No se encontraron productos.</div>`;
+        return;
+      }
+      cont.innerHTML = catalogoFiltrado.map(p => {
+        // Si tiene imagen, usarla; si no, placeholder
+        let imgSrc = p.imagen_principal || 'https://placehold.co/400x400/0A398A/FFFFFF?text=Sin+Imagen';
+        // Normalizar ruta: si no empieza con http o /, agregar /
+        if (imgSrc && !imgSrc.startsWith('http') && !imgSrc.startsWith('/')) {
+          imgSrc = '/' + imgSrc;
+        }
+        return `
+          <div class="product-card bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200 flex flex-col justify-between p-4">
+            <div>
+              <div class="relative bg-slate-50 rounded-xl aspect-square flex items-center justify-center p-4 mb-3 cursor-pointer" onclick="verDetalle(${p.id_producto})">
+                <img src="${imgSrc}" alt="${p.nombre}" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='https://placehold.co/400x400/0A398A/FFFFFF?text=Sin+Imagen'">
+                <span class="absolute bottom-2 right-2 bg-blue-50 text-madrid-blue text-[10px] font-bold px-2 py-0.5 rounded-md border border-blue-100">${p.categoria || 'General'}</span>
+              </div>
+              <h3 class="text-xs sm:text-sm font-black text-slate-900 leading-snug mb-1 cursor-pointer hover:text-madrid-blue" onclick="verDetalle(${p.id_producto})">${p.nombre}</h3>
+              <p class="text-[11px] text-slate-500 font-medium mb-2">${p.principio_activo || ''} · ${p.presentacion || ''}</p>
+            </div>
+            <div class="space-y-3 pt-2 border-t border-slate-100">
+              <div class="flex items-baseline justify-between">
+                <span class="text-xs text-slate-400 font-bold">Precio Ref:</span>
+                <span class="text-emerald-600 font-black text-base sm:text-lg">${formatoMXN(p.precio_venta_mxn || 0)}</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <button onclick="verDetalle(${p.id_producto})" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold py-2 rounded-xl transition">Detalles</button>
+                <button onclick="agregarAlCarrito(${p.id_producto})" class="w-full bg-madrid-blue hover:bg-madrid-darkblue text-white text-xs font-bold py-2 rounded-xl transition flex items-center justify-center gap-1 shadow"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Cotizar</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderPaginacion(total) {
+      const totalPaginas = Math.ceil(total / POR_PAGINA);
+      const cont = document.getElementById('paginacion');
+      if(!cont || totalPaginas <= 1) { cont.innerHTML = ''; return; }
+      cont.innerHTML = `
+        <button onclick="cambiarPagina(-1)" ${pagina === 1 ? 'disabled' : ''} class="px-4 py-2 rounded-xl bg-white border border-slate-200 disabled:opacity-40 text-xs font-bold shadow-sm">Anterior</button>
+        <span class="text-xs font-bold text-slate-600">Página ${pagina} de ${totalPaginas}</span>
+        <button onclick="cambiarPagina(1)" ${pagina === totalPaginas ? 'disabled' : ''} class="px-4 py-2 rounded-xl bg-white border border-slate-200 disabled:opacity-40 text-xs font-bold shadow-sm">Siguiente</button>
+      `;
+    }
+
+    function cambiarPagina(delta) { pagina += delta; cargarCatalogo(); document.getElementById('catalogo').scrollIntoView({ behavior: 'smooth' }); }
+    function buscarCatalogo() { pagina = 1; cargarCatalogo(); }
+
+    function filtrarCategoria(cat) {
+      categoriaActual = cat;
+      document.querySelectorAll('#categoria-filtros .cat-btn').forEach(btn => {
+        if(btn.innerText.includes(cat) || (cat === 'Todas' && btn.innerText.includes('Todas'))) btn.className = "cat-btn active bg-madrid-blue text-white text-xs font-bold px-4 py-2 rounded-xl whitespace-nowrap transition shadow";
+        else btn.className = "cat-btn bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-xl whitespace-nowrap transition";
+      });
+      buscarCatalogo();
+    }
+    function buscarDesdeHero() {
+      const q = document.getElementById('buscador-hero').value;
+      document.getElementById('buscador').value = q;
+      buscarCatalogo();
+      document.getElementById('catalogo').scrollIntoView({ behavior: 'smooth' });
+    }
+    function filtrarPorSustancia(categoria) { filtrarCategoria(categoria); document.getElementById('catalogo').scrollIntoView({ behavior: 'smooth' }); }
+
+    // ============ PRODUCTOS MÁS VENDIDOS ============
+   
+    async function cargarProductosNacionales() {
+    try {
+    const resp = await fetch('/api/productos?destacados=nacionales&limit=10');
+    if (!resp.ok) throw new Error('Error al cargar nacionales');
+    const data = await resp.json();
+    const productos = data.productos || [];
+    const cont = document.getElementById('productos-nacionales');
+    const contador = document.getElementById('contador-nacionales');
+    if (contador) contador.textContent = `(${productos.length} productos)`;
+    renderProductosScroll(productos, cont);
+  } catch (err) {
+    console.error('Error nacionales:', err);
+    document.getElementById('productos-nacionales').innerHTML = '<p class="text-sm text-slate-400">No se pudieron cargar.</p>';
+  }
+}
+
+async function cargarProductosImportados() {
+  try {
+    const resp = await fetch('/api/productos?destacados=importados&limit=10');
+    if (!resp.ok) throw new Error('Error al cargar importados');
+    const data = await resp.json();
+    const productos = data.productos || [];
+    const cont = document.getElementById('productos-importados');
+    const contador = document.getElementById('contador-importados');
+    if (contador) contador.textContent = `(${productos.length} variantes)`;
+    renderProductosScroll(productos, cont);
+  } catch (err) {
+    console.error('Error importados:', err);
+    document.getElementById('productos-importados').innerHTML = '<p class="text-sm text-slate-400">No se pudieron cargar.</p>';
+  }
+}
+function renderProductosScroll(productos, contenedor) {
+  if (!contenedor) return;
+  if (!productos || productos.length === 0) {
+    contenedor.innerHTML = `<div class="text-sm text-slate-400 p-4 text-center">No hay productos disponibles.</div>`;
+    return;
+  }
+  contenedor.innerHTML = productos.map(p => {
+    const nombre = p.nombre || 'Sin nombre';
+    const principio = p.principio_activo || '';
+    const precio = p.precio_venta_mxn || 0;
+    const id = p.id_producto || 0;
+    let imagen = p.imagen_principal || 'https://placehold.co/200x200/0A398A/FFFFFF?text=Sin+Imagen';
+    if (imagen && !imagen.startsWith('http') && !imagen.startsWith('/')) {
+      imagen = '/' + imagen;
+    }
+    // Bandera según país
+    const bandera = p.pais_origen === 'India' ? '🇮🇳' : 
+                    p.pais_origen === 'China' ? '🇨🇳' : 
+                    p.pais_origen === 'México' ? '🇲🇽' : '🌍';
+    return `
+      <div class="product-card bg-white rounded-2xl shadow-sm hover:shadow-md overflow-hidden border border-slate-100 flex-shrink-0 w-[160px] sm:w-[200px] cursor-pointer" onclick="verDetalle(${id})">
+        <div class="relative">
+          <img src="${imagen}" alt="${nombre}" class="w-full aspect-square object-contain bg-white p-2" onerror="this.onerror=null; this.src='https://placehold.co/200x200/0A398A/FFFFFF?text=Error'">
+          <span class="absolute top-2 left-2 text-lg">${bandera}</span>
+        </div>
+        <div class="p-2">
+          <h4 class="text-sm font-bold text-madrid-blue leading-tight line-clamp-2">${nombre.split(' - ')[0]}</h4>
+          <p class="text-[10px] text-slate-400 truncate">${principio}</p>
+          <p class="text-emerald-600 font-black text-sm mt-1">${formatoMXN(precio)}</p>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+    // ============ VER DETALLE CON MODAL ============
+    function verDetalle(id) {
+      const p = catalogoFiltrado.find(item => item.id_producto === id);
+      if (!p) {
+        mostrarMensaje('Producto no encontrado', 'No se encontró el producto solicitado.');
+        return;
+      }
+
+      let imgSrc = p.imagen_principal || 'https://placehold.co/500x500/0A398A/FFFFFF?text=Sin+Imagen';
+
+      const modalContent = document.getElementById('modal-content');
+      modalContent.innerHTML = `
+        <button onclick="cerrarModal()" class="absolute top-3 right-3 bg-white/90 rounded-full p-2 z-10 shadow hover:bg-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <div class="bg-slate-50 flex items-center justify-center p-6 rounded-t-3xl">
+          <img src="${imgSrc}" class="max-h-64 object-contain" onerror="this.onerror=null; this.src='https://placehold.co/500x500/0A398A/FFFFFF?text=Sin+Imagen'">
+        </div>
+        <div class="p-6 space-y-4">
+          <h2 class="text-xl font-black text-madrid-blue">${p.nombre}</h2>
+          <p class="text-sm text-slate-500">${p.principio_activo || ''} · ${p.presentacion || ''}</p>
+          <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+            <span class="text-xs text-slate-400 font-bold uppercase block">Precio Referencial</span>
+            <span class="text-3xl font-black text-emerald-600">${formatoMXN(p.precio_venta_mxn || 0)}</span>
+            <p class="text-xs text-slate-500 mt-1">${p.disponibilidad || 'Disponible'} · ${p.tiempo_entrega || '24 horas'}</p>
+          </div>
+          ${p.requiere_receta ? '<div class="bg-red-50 text-red-700 text-xs font-bold rounded-xl p-3 border border-red-200">⚠️ Este producto requiere receta médica.</div>' : ''}
+          <div class="grid grid-cols-2 gap-3 pt-2">
+            <button onclick="agregarAlCarrito(${p.id_producto}); cerrarModal();" class="bg-madrid-blue hover:bg-madrid-darkblue text-white font-bold py-3 rounded-xl text-sm transition">
+              <i data-lucide="shopping-bag" class="w-4 h-4 inline mr-2"></i> Agregar a Cotización
+            </button>
+            <button onclick="comprarProductoDirecto('${p.nombre.replace(/'/g, "\\'")}', '${formatoMXN(p.precio_venta_mxn || 0)}')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl text-sm transition">
+              <i data-lucide="message-circle" class="w-4 h-4 inline mr-2"></i> Pedir por WhatsApp
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modal-overlay').classList.remove('hidden');
+      document.getElementById('modal-overlay').classList.add('flex');
+      refrescarIconos();
+    }
+
+    function cerrarModal() {
+      document.getElementById('modal-overlay').classList.add('hidden');
+      document.getElementById('modal-overlay').classList.remove('flex');
+    }
+
+    function comprarProductoDirecto(nombre, precio) {
+      const msj = `¡Hola Farmacias Madrid! 👋 Me interesa adquirir:\n\n*${nombre}*\nPrecio: ${precio}\n\n¿Me pueden confirmar disponibilidad y envío?`;
+      window.open(`https://wa.me/${TEL_WHATSAPP}?text=${encodeURIComponent(msj)}`, '_blank');
+    }
+
+    // ============ CARRITO ============
+    function agregarAlCarrito(id) {
+      const prod = catalogoFiltrado.find(p => p.id_producto === id);
+      if(!prod) return;
+      const existe = carrito.find(i => i.id === id);
+      if(existe) existe.cantidad += 1;
+      else carrito.push({ ...prod, cantidad: 1, id: id });
+      actualizarCarritoUI();
+      abrirCarrito();
+    }
+    function cambiarCantidadCarrito(id, delta) {
+      const item = carrito.find(i => i.id === id);
+      if(!item) return;
+      item.cantidad += delta;
+      if(item.cantidad <= 0) carrito = carrito.filter(i => i.id !== id);
+      actualizarCarritoUI();
+    }
+    function actualizarCarritoUI() {
+      const countEl = document.getElementById('cart-counter');
+      const container = document.getElementById('cart-items-container');
+      const totalEl = document.getElementById('cart-total-display');
+      const totalItems = carrito.reduce((acc, i) => acc + i.cantidad, 0);
+      const totalPrecio = carrito.reduce((acc, i) => acc + ((i.precio_venta_mxn || 0) * i.cantidad), 0);
+      if(countEl) countEl.innerText = totalItems;
+      if(totalEl) totalEl.innerText = formatoMXN(totalPrecio);
+      if(!container) return;
+      if(carrito.length === 0) { container.innerHTML = `<div class="text-center text-slate-400 py-12 text-sm">Tu cotización está vacía.<br>Agrega medicamentos desde el catálogo.</div>`; return; }
+      container.innerHTML = carrito.map(item => `
+        <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl">
+          <div class="flex-1 pr-2">
+            <p class="font-bold text-xs text-slate-800 line-clamp-1">${item.nombre}</p>
+            <p class="text-[10px] text-slate-500">${formatoMXN(item.precio_venta_mxn || 0)} c/u</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="cambiarCantidadCarrito(${item.id}, -1)" class="w-6 h-6 rounded bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs">-</button>
+            <span class="text-xs font-bold w-4 text-center">${item.cantidad}</span>
+            <button onclick="cambiarCantidadCarrito(${item.id}, 1)" class="w-6 h-6 rounded bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs">+</button>
+          </div>
+        </div>
+      `).join('');
+      refrescarIconos();
+    }
+    function abrirCarrito() { document.getElementById('cart-drawer-overlay').classList.remove('hidden'); document.getElementById('cart-drawer').classList.remove('translate-x-full'); }
+    function cerrarCarrito() { document.getElementById('cart-drawer-overlay').classList.add('hidden'); document.getElementById('cart-drawer').classList.add('translate-x-full'); }
+    function enviarCotizaciónCarrito() {
+      if(carrito.length === 0) return;
+      let mensaje = "¡Hola Farmacias Madrid! 👋 Quisiera cotizar y realizar pedido de los siguientes medicamentos:\n\n";
+      carrito.forEach(i => mensaje += `• *${i.nombre}* x${i.cantidad} - ${formatoMXN((i.precio_venta_mxn || 0) * i.cantidad)}\n`);
+      const total = carrito.reduce((acc, i) => acc + ((i.precio_venta_mxn || 0) * i.cantidad), 0);
+      mensaje += `\n*Total Estimado: ${formatoMXN(total)}*\n\n¿Me confirman disponibilidad y datos para envío?`;
+      window.open(`https://wa.me/${TEL_WHATSAPP}?text=${encodeURIComponent(mensaje)}`, '_blank');
+    }
+
+    // ============ OTRAS FUNCIONES ============
+    function enviarCotizacionReceta() {
+      const detalles = document.getElementById('rx-detalles').value;
+      if(!detalles) { mostrarMensaje('Información Incompleta', 'Por favor ingresa los medicamentos requeridos o tu diagnóstico.'); return; }
+      const nombre = document.getElementById('rx-nombre').value;
+      const ciudad = document.getElementById('rx-ciudad').value;
+      const msj = `¡Hola Farmacias Madrid! 👋 Quisiera solicitar cotización de receta médica:\n\n*Paciente:* ${nombre || 'No especificado'}\n*Ciudad:* ${ciudad || 'No especificada'}\n*Detalles/Medicamentos:* ${detalles}\n\nQuedo en espera de precio y disponibilidad.`;
+      window.open(`https://wa.me/${TEL_WHATSAPP}?text=${encodeURIComponent(msj)}`, '_blank');
+    }
+    function calculateNextDose() {
+      const inputDate = document.getElementById('lastDoseDate').value;
+      if(!inputDate) { mostrarMensaje('Fecha Requerida', 'Por favor selecciona la fecha de tu última inyección.'); return; }
+      const lastDate = new Date(inputDate);
+      const nextDate = new Date(lastDate);
+      nextDate.setMonth(nextDate.getMonth() + 6);
+      document.getElementById('nextDateDisplay').innerText = nextDate.toLocaleDateString('es-ES', { year:'numeric', month:'long', day:'numeric' });
+      document.getElementById('calculatorResult').classList.remove('hidden');
+    }
+    function descargarICS() {
+      const inputDate = document.getElementById('lastDoseDate').value;
+      if(!inputDate) return;
+      const lastDate = new Date(inputDate);
+      const nextDate = new Date(lastDate);
+      nextDate.setMonth(nextDate.getMonth() + 6);
+      const startDateStr = nextDate.toISOString().replace(/-|:|\.\d\d\d/g, "").substring(0, 8);
+      const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Farmacias Madrid//Prolia Reminder//ES\nBEGIN:VEVENT\nSUMMARY:Aplicación de Próxima Dosis de Prolia® (Denosumab 60mg)\nDESCRIPTION:Recordatorio de administración subcutánea de Prolia 60mg cada 6 meses.\nDTSTART;VALUE=DATE:${startDateStr}\nDTEND;VALUE=DATE:${startDateStr}\nSTATUS:CONFIRMED\nEND:VEVENT\nEND:VCALENDAR`;
+      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute('download', 'Recordatorio_Prolia_Farmacias_Madrid.ics');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    function agendarRecordatorioWhatsApp() {
+      const dateText = document.getElementById('nextDateDisplay').innerText;
+      window.open(`https://wa.me/${TEL_WHATSAPP}?text=${encodeURIComponent(`¡Hola Farmacias Madrid! 👋 Quisiera programar el recordatorio de mi dosis de Prolia® para la fecha: ${dateText}.`)}`, '_blank');
+    }
+    function simularRastreo() {
+      const input = document.getElementById('tracking-input').value;
+      if(!input) { mostrarMensaje('Guía Inválida', 'Por favor ingresa un número de guía válido.'); return; }
+      mostrarMensaje('Estatus de Guía: ' + input, 'El envío se encuentra en ruta. Sensor de cadena de frío reporta 4.2°C constantes.');
+    }
+    function formatoMXN(valor) {
+      if(typeof valor === 'string') return valor;
+      return valor.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 2 });
+    }
+    function refrescarIconos() { if (typeof lucide !== "undefined") lucide.createIcons(); }
+    function toggleFAQ(el) {
+      const answer = el.nextElementSibling;
+      const icon = el.querySelector('i');
+      if(answer.classList.contains('open')) { answer.classList.remove('open'); icon.style.transform = 'rotate(0deg)'; } else { answer.classList.add('open'); icon.style.transform = 'rotate(180deg)'; }
+    }
+    function mostrarMensaje(titulo, mensaje) {
+      document.getElementById('alert-title').innerText = titulo;
+      document.getElementById('alert-message').innerText = mensaje;
+      document.getElementById('custom-alert').classList.remove('hidden');
+      document.getElementById('custom-alert').classList.add('flex');
+      refrescarIconos();
+    }
+    function cerrarMensaje() {
+      document.getElementById('custom-alert').classList.add('hidden');
+      document.getElementById('custom-alert').classList.remove('flex');
+    }
+    function initChart() {
+      const canvasEl = document.getElementById('efficacyChart');
+      if(!canvasEl) return;
+      new Chart(canvasEl.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: ['Fractura Vertebral (68%)', 'Fractura de Cadera (40%)', 'Fractura No Vertebral (20%)'],
+          datasets: [{ label: '% Reducción de Riesgo a 3 Años', data: [68,40,20], backgroundColor: ['rgba(10,57,138,0.85)','rgba(255,192,0,0.85)','rgba(16,185,129,0.85)'], borderColor: ['#0A398A','#E5AC00','#10B981'], borderWidth: 2, borderRadius: 10 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } } }
+      });
+    }
+
+
+// ============ CATÁLOGO NACIONAL ============
+async function cargarCatalogoNacional() {
+  const statusEl = document.getElementById('catalogo-nacional-status');
+  try {
+    const search = document.getElementById('buscador-nacional')?.value || '';
+    const resp = await fetch(`/api/productos?pais=México&limit=24&search=${encodeURIComponent(search)}`);
+    const data = await resp.json();
+    document.getElementById('total-nacionales').innerText = `${data.total || 0} Nacionales Disponibles`;
+    if(statusEl) statusEl.classList.add('hidden');
+    renderTarjetas(data.productos || [], 'catalogo-nacional-list', 'nacional');
+    refrescarIconos();
+  } catch(e) { console.error('Error nacionales:', e); }
+}
+function buscarNacional() { cargarCatalogoNacional(); }
+
+// ============ CATÁLOGO IMPORTACIÓN ============
+async function cargarCatalogoImportacion() {
+  const statusEl = document.getElementById('catalogo-importacion-status');
+  try {
+    const search = document.getElementById('buscador-importacion')?.value || '';
+    const resp = await fetch(`/api/productos?pais=!México&limit=24&search=${encodeURIComponent(search)}`);
+    const data = await resp.json();
+    document.getElementById('total-importados').innerText = `${data.total || 0} Importados Disponibles`;
+    if(statusEl) statusEl.classList.add('hidden');
+    renderTarjetas(data.productos || [], 'catalogo-importacion-list', 'importado');
+    refrescarIconos();
+  } catch(e) { console.error('Error importados:', e); }
+}
+function buscarImportacion() { cargarCatalogoImportacion(); }
+
+// ============ RENDER TARJETAS ============
+function renderTarjetas(productos, contenedorId, tipo) {
+  const cont = document.getElementById(contenedorId);
+  if(!cont) return;
+  if(productos.length === 0) {
+    cont.innerHTML = `<div class="col-span-full text-center text-slate-400 py-16 bg-white rounded-3xl border border-slate-200">No se encontraron productos.</div>`;
+    return;
+  }
+  cont.innerHTML = productos.map(p => {
+    let imgSrc = p.imagen_principal || 'https://placehold.co/400x400/0A398A/FFFFFF?text=Sin+Imagen';
+    if (imgSrc && !imgSrc.startsWith('http') && !imgSrc.startsWith('/')) imgSrc = '/' + imgSrc;
+    const bandera = p.pais_origen === 'India' ? '🇮🇳' : p.pais_origen === 'México' ? '🇲🇽' : '🌍';
+    const precio = p.precio_venta_mxn || 0;
+    const precioStr = formatoMXN(precio).replace(/'/g, "\\'");
+    const nombreStr = p.nombre.replace(/'/g, "\\'");
+    const presentacionStr = (p.presentacion || '').replace(/'/g, "\\'");
+    
+    let infoExtra = '';
+    if (tipo === 'nacional') {
+      infoExtra = `<div class="bg-emerald-50 border border-emerald-200 rounded-lg p-2 mt-2 text-center">
+        <p class="text-[10px] font-bold text-emerald-700 flex items-center justify-center gap-1"><i data-lucide="plane" class="w-3 h-3"></i> Pídelo hoy, llega mañana</p>
+      </div>`;
+    } else {
+      infoExtra = `<div class="grid grid-cols-2 gap-1.5 mt-2">
+        <div class="bg-yellow-50 border border-yellow-300 rounded-lg p-2 text-center">
+          <p class="text-[10px] font-bold text-yellow-800 flex items-center justify-center gap-1"><i data-lucide="plane" class="w-3 h-3"></i> ✈️ 2 días</p>
+          <p class="text-[9px] text-yellow-700">Pago total</p>
+        </div>
+        <div class="bg-slate-50 border border-slate-300 rounded-lg p-2 text-center">
+          <p class="text-[10px] font-bold text-slate-700 flex items-center justify-center gap-1"><i data-lucide="ship" class="w-3 h-3"></i> 🚢 15 días</p>
+          <p class="text-[9px] text-slate-500">50% anticipo</p>
+        </div>
+      </div>`;
+    }
+    
+    return `
+      <div class="product-card bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200 flex flex-col justify-between p-4">
+        <div>
+          <div class="relative bg-slate-50 rounded-xl aspect-square flex items-center justify-center p-4 mb-3 cursor-pointer" onclick="verDetalle(${p.id_producto})">
+            <img src="${imgSrc}" alt="${p.nombre}" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='https://placehold.co/400x400/0A398A/FFFFFF?text=Sin+Imagen'">
+            <span class="absolute top-2 left-2 text-lg">${bandera}</span>
+          </div>
+          <h3 class="text-xs sm:text-sm font-black text-slate-900 leading-snug mb-1 cursor-pointer hover:text-madrid-blue" onclick="verDetalle(${p.id_producto})">${p.nombre} ${bandera}</h3>
+          <p class="text-[11px] text-slate-500 font-medium">${p.principio_activo || ''} · ${p.presentacion || ''}</p>
+          ${infoExtra}
+        </div>
+        <div class="space-y-2 pt-2 border-t border-slate-100 mt-3">
+          <div class="flex items-baseline justify-between">
+            <span class="text-xs text-slate-400 font-bold">Precio:</span>
+            <span class="text-emerald-600 font-black text-base sm:text-lg">${formatoMXN(precio)}</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="verDetalle(${p.id_producto})" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold py-2 rounded-xl transition">Detalles</button>
+            <button onclick="abrirReserva(${p.id_producto}, '${nombreStr}', ${precio}, '${imgSrc}', '${presentacionStr}')" class="w-full bg-madrid-blue hover:bg-madrid-darkblue text-white text-xs font-bold py-2 rounded-xl transition flex items-center justify-center gap-1 shadow"><i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i> Reservar</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============ MODAL RESERVA ============
+let productoReservando = null;
+
+function abrirReserva(id, nombre, precio, imagen, presentacion) {
+  productoReservando = { id, nombre, precio, imagen, presentacion };
+  const hoy = new Date();
+  const fechaStr = hoy.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  
+  document.getElementById('reserva-imagen').src = imagen;
+  document.getElementById('reserva-nombre-producto').innerText = nombre;
+  document.getElementById('reserva-presentacion').innerText = presentacion;
+  document.getElementById('reserva-fecha').value = fechaStr;
+  document.getElementById('reserva-total').innerText = formatoMXN(precio);
+  document.getElementById('reserva-anticipo').innerText = formatoMXN(precio * 0.5);
+  document.getElementById('reserva-resto').innerText = formatoMXN(precio * 0.5);
+  document.getElementById('reserva-nombre').value = '';
+  document.getElementById('reserva-telefono').value = '';
+  document.getElementById('reserva-ciudad').value = '';
+  
+  document.getElementById('modal-reserva').classList.remove('hidden');
+  document.getElementById('modal-reserva').classList.add('flex');
+  refrescarIconos();
+}
+
+function cerrarReserva() {
+  document.getElementById('modal-reserva').classList.add('hidden');
+  document.getElementById('modal-reserva').classList.remove('flex');
+}
+
+function enviarReserva() {
+  if (!productoReservando) return;
+  const nombre = document.getElementById('reserva-nombre').value.trim();
+  const tel = document.getElementById('reserva-telefono').value.trim();
+  const ciudad = document.getElementById('reserva-ciudad').value.trim();
+  const fecha = document.getElementById('reserva-fecha').value;
+  
+  if (!nombre || !tel || !ciudad) {
+    mostrarMensaje('Datos incompletos', 'Por favor completa nombre, WhatsApp y ciudad.');
+    return;
+  }
+  
+  const anticipo = productoReservando.precio * 0.5;
+  const resto = productoReservando.precio - anticipo;
+  
+  const msj = `¡Hola Farmacias Madrid! 👋 Quiero RESERVAR:
+
+*Producto:* ${productoReservando.nombre}
+*Presentación:* ${productoReservando.presentacion}
+
+💰 *Precio total:* ${formatoMXN(productoReservando.precio)}
+💵 *Anticipo 50%:* ${formatoMXN(anticipo)}
+💳 *Resto al recibir:* ${formatoMXN(resto)}
+
+👤 *Mis datos:*
+Nombre: ${nombre}
+WhatsApp: ${tel}
+Ciudad: ${ciudad}
+Fecha: ${fecha}
+
+¿Me confirman disponibilidad y forma de pago?`;
+
+  window.open(`https://wa.me/527753200224?text=${encodeURIComponent(msj)}`, '_blank');
+  cerrarReserva();
+}
+
+// ============ MAPA ============
+let mapaRastreo = null;
+
+function inicializarMapa() {
+  const contenedor = document.getElementById('mapa-rastreo');
+  if(!contenedor || mapaRastreo) return;
+  
+  mapaRastreo = L.map('mapa-rastreo').setView([20.0803, -98.3626], 14);
+  
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap', maxZoom: 19
+  }).addTo(mapaRastreo);
+  
+  // Iconos
+  const iconoFarm = (color) => L.divIcon({
+    html: `<div style="background:${color};color:white;padding:6px;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(0,0,0,0.3);font-size:16px;">🏥</div>`,
+    className: '', iconSize: [36,36], iconAnchor: [18,18]
+  });
+  const iconoAlmacen = L.divIcon({
+    html: '<div style="background:#052258;color:white;padding:6px;border-radius:50%;border:3px solid #FFC000;box-shadow:0 0 12px rgba(255,192,0,0.6);font-size:18px;">🏭</div>',
+    className: '', iconSize: [40,40], iconAnchor: [20,20]
+  });
+  
+  // Sucursales reales
+  L.marker([20.0805, -98.3628], { icon: iconoFarm('#0A398A') }).addTo(mapaRastreo).bindPopup('<b>🏥 Farmacias Madrid Suc. 21</b><br>21 de Marzo Nte. 406<br>📞 775 320 0224');
+  L.marker([20.0840, -98.3655], { icon: iconoFarm('#0A398A') }).addTo(mapaRastreo).bindPopup('<b>🏥 Farmacias Madrid Suc. Lázaro</b><br>Gral. L Cárdenas 107<br>📞 775 320 0224');
+  L.marker([20.0808, -98.3660], { icon: iconoFarm('#0A398A') }).addTo(mapaRastreo).bindPopup('<b>🏥 Farmacias Madrid Suc. Caballito</b><br>21 de Marzo Nte. 913<br>📞 775 320 0224');
+  L.marker([20.0910, -98.3700], { icon: iconoAlmacen }).addTo(mapaRastreo).bindPopup('<b>🏭 ALMACÉN MAYORISTA</b><br>Calz. Hidalgo 1211<br>Centro de distribución nacional');
+}
+
+function buscarEnMapa() {
+  const guia = document.getElementById('guia-mapa').value;
+  if(!guia) { mostrarMensaje('Guía requerida', 'Ingresa tu número de guía'); return; }
+  if(!mapaRastreo) inicializarMapa();
+  mostrarMensaje('Rastreando: ' + guia, 'Tu paquete está en tránsito. Llegada estimada: mañana antes de las 14:00 hrs.');
+}
+
+setTimeout(() => { try { inicializarMapa(); } catch(e) { console.error('Mapa:', e); } }, 2000);
+
+
+    // ============ INIT ============
+    window.onload = function() {
+      renderCarrusel();
+      cargarCatalogoNacional();
+      cargarCatalogoImportacion();
+      cargarProductosNacionales();
+      cargarProductosImportados();
+      initChart();
+      refrescarIconos();
+      actualizarCarritoUI();
+    };
+  </script>
+
+  <!-- MODAL RESERVA -->
+  <div id="modal-reserva" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[80] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-black text-madrid-blue">Reservar Producto</h3>
+        <button onclick="cerrarReserva()" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+      
+      <div class="bg-slate-50 rounded-2xl p-4 mb-4 flex items-center gap-4">
+        <img id="reserva-imagen" src="" class="w-20 h-20 object-contain rounded-xl bg-white p-2" onerror="this.src='https://placehold.co/200x200/0A398A/FFFFFF?text=Producto'">
+        <div class="flex-1">
+          <p id="reserva-nombre-producto" class="font-black text-sm text-slate-900 line-clamp-2"></p>
+          <p id="reserva-presentacion" class="text-xs text-slate-500"></p>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nombre completo:</label>
+          <input id="reserva-nombre" type="text" placeholder="Tu nombre" class="w-full p-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-madrid-blue focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp:</label>
+          <input id="reserva-telefono" type="tel" placeholder="Ej. 7751234567" class="w-full p-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-madrid-blue focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Ciudad de entrega:</label>
+          <input id="reserva-ciudad" type="text" placeholder="Ej. Tulancingo, Hidalgo" class="w-full p-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-madrid-blue focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Fecha de reserva:</label>
+          <input id="reserva-fecha" type="text" readonly class="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-sm font-mono">
+        </div>
+      </div>
+
+      <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mt-4 space-y-2">
+        <div class="flex justify-between text-sm">
+          <span class="text-slate-600">Precio total:</span>
+          <span id="reserva-total" class="font-black text-slate-900"></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-slate-600">Anticipo 50%:</span>
+          <span id="reserva-anticipo" class="font-black text-emerald-600"></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-slate-600">Resto al recibir:</span>
+          <span id="reserva-resto" class="font-black text-slate-900"></span>
+        </div>
+      </div>
+
+      <p class="text-[11px] text-slate-500 mt-3 leading-relaxed">
+        ⚠️ Pueden surgir contratiempos aduanales. Si Farmacias Madrid no entrega en el tiempo máximo prometido, el anticipo se devuelve al 100%.
+      </p>
+
+      <div class="grid grid-cols-2 gap-3 mt-5">
+        <button onclick="cerrarReserva()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl text-sm transition">Cancelar</button>
+        <button onclick="enviarReserva()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2">
+          <i data-lucide="message-circle" class="w-4 h-4"></i> Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
