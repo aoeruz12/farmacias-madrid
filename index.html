@@ -488,6 +488,7 @@
     let pagina = 1;
     const POR_PAGINA = 12;
     let carrito = [];
+    let productosCache = {};
 
     function buildApiUrl() {
       const search = document.getElementById('buscador')?.value || '';
@@ -612,13 +613,13 @@
 
 async function cargarProductosImportados() {
   try {
-    const resp = await fetch('/api/productos?destacados=importados&limit=10');
+    const resp = await fetch('/api/productos?destacados=importados&limit=20');
     if (!resp.ok) throw new Error('Error al cargar importados');
     const data = await resp.json();
     const productos = data.productos || [];
     const cont = document.getElementById('productos-importados');
     const contador = document.getElementById('contador-importados');
-    if (contador) contador.textContent = `(${productos.length} variantes)`;
+    if (contador) contador.textContent = `(${productos.length} opciones)`;
     renderProductosScroll(productos, cont);
   } catch (err) {
     console.error('Error importados:', err);
@@ -631,6 +632,7 @@ function renderProductosScroll(productos, contenedor) {
     contenedor.innerHTML = `<div class="text-sm text-slate-400 p-4 text-center">No hay productos disponibles.</div>`;
     return;
   }
+  productos.forEach(p => { if (p && p.id_producto) productosCache[p.id_producto] = p; });
   contenedor.innerHTML = productos.map(p => {
     const nombre = p.nombre || 'Sin nombre';
     const principio = p.principio_activo || '';
@@ -643,6 +645,8 @@ function renderProductosScroll(productos, contenedor) {
     const bandera = p.pais_origen === 'India' ? '🇮🇳' : 
                     p.pais_origen === 'China' ? '🇨🇳' : 
                     p.pais_origen === 'México' ? '🇲🇽' : '🌍';
+    const variantesBadge = p.variantes && p.variantes.length > 0 ? 
+      `<span class="text-[9px] bg-amber-50 text-amber-800 font-bold px-1.5 py-0.5 rounded border border-amber-200 mt-1 inline-block">${p.variantes.length} variantes</span>` : '';
     return `
       <div class="product-card bg-white rounded-2xl shadow-sm hover:shadow-md overflow-hidden border border-slate-100 flex-shrink-0 w-[160px] sm:w-[200px] cursor-pointer" onclick="verDetalle(${id})">
         <div class="relative">
@@ -653,6 +657,7 @@ function renderProductosScroll(productos, contenedor) {
           <h4 class="text-sm font-bold text-madrid-blue leading-tight line-clamp-2">${nombre.split(' - ')[0]}</h4>
           <p class="text-[10px] text-slate-400 truncate">${principio}</p>
           <p class="text-emerald-600 font-black text-sm mt-1">${formatoMXN(precio)}</p>
+          ${variantesBadge}
         </div>
       </div>
     `;
@@ -661,7 +666,7 @@ function renderProductosScroll(productos, contenedor) {
 
     // ============ VER DETALLE CON MODAL ============
     function verDetalle(id) {
-      const p = catalogoFiltrado.find(item => item.id_producto === id);
+      const p = catalogoFiltrado.find(item => item.id_producto === id) || productosCache[id];
       if (!p) {
         mostrarMensaje('Producto no encontrado', 'No se encontró el producto solicitado.');
         return;
@@ -670,6 +675,13 @@ function renderProductosScroll(productos, contenedor) {
       let imgSrc = p.imagen_principal || 'https://placehold.co/500x500/0A398A/FFFFFF?text=Sin+Imagen';
 
       const modalContent = document.getElementById('modal-content');
+      const variantesInfo = (p.variantes && p.variantes.length > 0) ? `
+        <div class="bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold rounded-xl p-3 flex items-center justify-between">
+          <span class="flex items-center gap-1.5"><i data-lucide="layers" class="w-4 h-4 text-amber-600"></i> ${p.variantes.length} opciones internacionales disponibles</span>
+          <span class="text-amber-700 font-black">Desde ${formatoMXN(p.precio_venta_mxn || 0)}</span>
+        </div>
+      ` : '';
+
       modalContent.innerHTML = `
         <button onclick="cerrarModal()" class="absolute top-3 right-3 bg-white/90 rounded-full p-2 z-10 shadow hover:bg-white transition">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -685,6 +697,7 @@ function renderProductosScroll(productos, contenedor) {
             <span class="text-3xl font-black text-emerald-600">${formatoMXN(p.precio_venta_mxn || 0)}</span>
             <p class="text-xs text-slate-500 mt-1">${p.disponibilidad || 'Disponible'} · ${p.tiempo_entrega || '24 horas'}</p>
           </div>
+          ${variantesInfo}
           ${p.requiere_receta ? '<div class="bg-red-50 text-red-700 text-xs font-bold rounded-xl p-3 border border-red-200">⚠️ Este producto requiere receta médica.</div>' : ''}
           <div class="grid grid-cols-2 gap-3 pt-2">
             <button onclick="agregarAlCarrito(${p.id_producto}); cerrarModal();" class="bg-madrid-blue hover:bg-madrid-darkblue text-white font-bold py-3 rounded-xl text-sm transition">
@@ -885,6 +898,7 @@ function renderTarjetas(productos, contenedorId, tipo) {
     cont.innerHTML = `<div class="col-span-full text-center text-slate-400 py-16 bg-white rounded-3xl border border-slate-200">No se encontraron productos.</div>`;
     return;
   }
+  productos.forEach(p => { if (p && p.id_producto) productosCache[p.id_producto] = p; });
   cont.innerHTML = productos.map(p => {
     let imgSrc = p.imagen_principal || 'https://placehold.co/400x400/0A398A/FFFFFF?text=Sin+Imagen';
     if (imgSrc && !imgSrc.startsWith('http') && !imgSrc.startsWith('/')) imgSrc = '/' + imgSrc;

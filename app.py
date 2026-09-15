@@ -163,20 +163,17 @@ def get_productos():
         like = f'%{search}%'
         params.extend([like, like, like])
 
+    order_by = ''
     if pais:
         if pais.lower() in ('méxico', 'mexico'):
             query += ' AND categoria = ?'
             params.append('Nacional')
-            query += ' ORDER BY prioridad DESC, id_producto ASC'
+            order_by = ' ORDER BY prioridad DESC, id_producto ASC'
         else:
             query += ' AND categoria = ?'
             params.append('Importación')
+            order_by = " ORDER BY CASE WHEN destacado = '1' THEN 0 ELSE 1 END, prioridad DESC, id_producto DESC"
 
-
-
-
-
-    
     if destacados == 'nacionales':
         mas_vendidos = [
             'RoActemra', 'Tocilizumab', 'Simponi', 'Golimumab',
@@ -192,19 +189,16 @@ def get_productos():
         params.extend([f'%{m}%' for m in mas_vendidos])
 
     if destacados == 'importados':
-        mas_vendidos = [
-            'Keytruda', 'Ozempic', 'Humira', 'Enbrel', 'Remicade',
-            'Orencia', 'Actemra', 'Cimzia', 'Simponi', 'Xeljanz'
-        ]
-        condiciones = ' OR '.join(['nombre LIKE ?' for _ in mas_vendidos])
-        query += f' AND categoria = ? AND ({condiciones})'
+        query += " AND categoria = ? AND destacado = '1'"
         params.append('Importación')
-        params.extend([f'%{m}%' for m in mas_vendidos])
+        order_by = " ORDER BY CASE WHEN imagen_principal IS NOT NULL AND imagen_principal != '' AND imagen_principal NOT LIKE '%placehold%' THEN 0 ELSE 1 END, id_producto DESC"
 
     count_query = query.replace('SELECT *', 'SELECT COUNT(*)')
     cursor.execute(count_query, params)
     total = cursor.fetchone()[0]
 
+    if order_by:
+        query += order_by
     query += ' LIMIT ? OFFSET ?'
     params.extend([limit, offset])
     cursor.execute(query, params)
@@ -213,6 +207,13 @@ def get_productos():
 
     productos_list = []
     for p in productos:
+        vars_list = []
+        if 'variantes' in p.keys() and p['variantes']:
+            try:
+                vars_list = json.loads(p['variantes'])
+            except Exception:
+                vars_list = []
+
         productos_list.append({
             'id_producto': p['id_producto'],
             'nombre': p['nombre'],
@@ -227,7 +228,8 @@ def get_productos():
             'pais_origen': 'México' if p['categoria'] == 'Nacional' else 'Importación',
             'proveedor': '',
             'descripcion': '',
-            'variantes': []
+            'variantes': vars_list,
+            'destacado': p['destacado'] if 'destacado' in p.keys() else None
         })
 
     return jsonify({
