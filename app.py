@@ -189,9 +189,9 @@ def get_productos():
         params.extend([f'%{m}%' for m in mas_vendidos])
 
     if destacados == 'importados':
-        query += " AND categoria = ? AND destacado = '1'"
+        query += " AND categoria = ? AND imagen_principal LIKE 'https://%' AND imagen_principal NOT LIKE '%placehold%' AND imagen_principal NOT LIKE '%countryicon%'"
         params.append('Importación')
-        order_by = " ORDER BY CASE WHEN imagen_principal IS NOT NULL AND imagen_principal != '' AND imagen_principal NOT LIKE '%placehold%' THEN 0 ELSE 1 END, id_producto DESC"
+        order_by = " ORDER BY CASE WHEN destacado = '1' THEN 0 ELSE 1 END, id_producto DESC"
 
     count_query = query.replace('SELECT *', 'SELECT COUNT(*)')
     cursor.execute(count_query, params)
