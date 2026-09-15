@@ -675,12 +675,39 @@ function renderProductosScroll(productos, contenedor) {
       let imgSrc = p.imagen_principal || 'https://placehold.co/500x500/0A398A/FFFFFF?text=Sin+Imagen';
 
       const modalContent = document.getElementById('modal-content');
-      const variantesInfo = (p.variantes && p.variantes.length > 0) ? `
-        <div class="bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold rounded-xl p-3 flex items-center justify-between">
-          <span class="flex items-center gap-1.5"><i data-lucide="layers" class="w-4 h-4 text-amber-600"></i> ${p.variantes.length} opciones internacionales disponibles</span>
-          <span class="text-amber-700 font-black">Desde ${formatoMXN(p.precio_venta_mxn || 0)}</span>
-        </div>
-      ` : '';
+      let variantesHtml = '';
+      if (p.variantes && p.variantes.length > 0) {
+        variantesHtml = `
+          <div class="mt-4 border border-amber-200 bg-amber-50/50 rounded-2xl p-4">
+            <h4 class="text-xs font-bold text-amber-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <i data-lucide="layers" class="w-4 h-4 text-amber-600"></i> Opciones y Variantes Disponibles (${p.variantes.length})
+            </h4>
+            <div class="space-y-2">
+              ${p.variantes.map((v, vidx) => {
+                const vNombre = v.nombre || v.Variante_Nombre || 'Opción ' + (vidx+1);
+                const vPrecio = v.precio || v.Precio_Final_MXN_65 || p.precio_venta_mxn || 0;
+                const vPres = v.presentacion || v.Presentacion || '';
+                const vPais = v.pais || v.Pais || 'India 🇮🇳';
+                return `
+                  <div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-amber-100 hover:border-amber-300 transition text-xs shadow-sm">
+                    <div>
+                      <div class="font-bold text-slate-800">${vNombre}</div>
+                      <div class="text-[11px] text-slate-400">${vPres} · ${vPais}</div>
+                    </div>
+                    <div class="text-right">
+                      <div class="font-black text-emerald-600 text-sm">${formatoMXN(vPrecio)}</div>
+                      <button onclick="comprarProductoDirecto('${vNombre.replace(/'/g, "\\'")}', '${formatoMXN(vPrecio)}')" class="text-[10px] bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2 py-0.5 rounded font-bold mt-0.5 inline-block">
+                        Cotizar
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
 
       modalContent.innerHTML = `
         <button onclick="cerrarModal()" class="absolute top-3 right-3 bg-white/90 rounded-full p-2 z-10 shadow hover:bg-white transition">
@@ -697,8 +724,9 @@ function renderProductosScroll(productos, contenedor) {
             <span class="text-3xl font-black text-emerald-600">${formatoMXN(p.precio_venta_mxn || 0)}</span>
             <p class="text-xs text-slate-500 mt-1">${p.disponibilidad || 'Disponible'} · ${p.tiempo_entrega || '24 horas'}</p>
           </div>
-          ${variantesInfo}
+          ${variantesHtml}
           ${p.requiere_receta ? '<div class="bg-red-50 text-red-700 text-xs font-bold rounded-xl p-3 border border-red-200">⚠️ Este producto requiere receta médica.</div>' : ''}
+
           <div class="grid grid-cols-2 gap-3 pt-2">
             <button onclick="agregarAlCarrito(${p.id_producto}); cerrarModal();" class="bg-madrid-blue hover:bg-madrid-darkblue text-white font-bold py-3 rounded-xl text-sm transition">
               <i data-lucide="shopping-bag" class="w-4 h-4 inline mr-2"></i> Agregar a Cotización

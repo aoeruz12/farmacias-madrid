@@ -33,10 +33,18 @@ CARPETAS_FOTOS = [
 
 def buscar_imagen(nombre_producto, ruta_guardada):
     """
-    1. PRIMERO: buscar en TODAS las carpetas de fotos (LOCAL)
-    2. Si no, usar URL externa
+    1. Si ruta_guardada ya es /static/ o URL válida, usarla directamente
+    2. Si no, buscar en carpetas locales
     3. Si no, devolver None
     """
+    if ruta_guardada:
+        if (ruta_guardada.startswith('/static/') or ruta_guardada.startswith('static/')):
+            local_path = ruta_guardada.lstrip('/')
+            if os.path.exists(local_path):
+                return '/' + local_path
+        if ruta_guardada.startswith('http') and 'placehold' not in ruta_guardada and 'countryicon' not in ruta_guardada:
+            return ruta_guardada
+
     # ========== CASO 1: BUSCAR EN TODAS LAS CARPETAS (LOCAL) ==========
     palabras = [p.lower() for p in re.findall(r'[A-Za-z0-9.]+', nombre_producto)]
     palabras = [p for p in palabras if len(p) >= 2]
@@ -61,17 +69,10 @@ def buscar_imagen(nombre_producto, ruta_guardada):
                     continue
                 
                 carpeta_norm = normalizar_texto(carpeta)
-                carpeta_norm = normalizar_texto(carpeta)
-                # Solo contar si la carpeta tiene archivos
                 tiene_archivos = any(f.lower().endswith((".jpg", ".jpeg", ".png", ".webp")) for f in os.listdir(carpeta_path))
                 if not tiene_archivos:
                     continue
                 score = sum(1 for p in palabras_norm if p in carpeta_norm)
-                
-                if score > mejor_score:
-                    mejor_score = score
-                    mejor_match = carpeta
-                    mejor_carpeta = carpeta_base
                 
                 if score > mejor_score:
                     mejor_score = score
@@ -90,9 +91,6 @@ def buscar_imagen(nombre_producto, ruta_guardada):
     
     # ========== CASO 2: URL EXTERNA ==========
     if ruta_guardada and ruta_guardada.startswith('http'):
-        # Si es placeholder, intentar buscar de nuevo (sin suerte)
-        if 'placehold' in ruta_guardada or 'countryicon' in ruta_guardada:
-            return ruta_guardada  # Placeholder
         return ruta_guardada
     
     # ========== CASO 3: ruta local explícita ==========
@@ -105,6 +103,7 @@ def buscar_imagen(nombre_producto, ruta_guardada):
                 return '/' + ruta_alt
     
     return None
+
 
 @app.route('/')
 def index():
@@ -189,9 +188,10 @@ def get_productos():
         params.extend([f'%{m}%' for m in mas_vendidos])
 
     if destacados == 'importados':
-        query += " AND categoria = ? AND imagen_principal LIKE 'https://%' AND imagen_principal NOT LIKE '%placehold%' AND imagen_principal NOT LIKE '%countryicon%'"
+        query += " AND categoria = ? AND (imagen_principal LIKE 'https://%' OR imagen_principal LIKE '/static/%' OR imagen_principal LIKE 'static/%') AND imagen_principal NOT LIKE '%placehold%' AND imagen_principal NOT LIKE '%countryicon%'"
         params.append('Importación')
-        order_by = " ORDER BY CASE WHEN destacado = '1' THEN 0 ELSE 1 END, id_producto DESC"
+        order_by = " ORDER BY CASE WHEN destacado = '1' THEN 0 ELSE 1 END, prioridad DESC, id_producto DESC"
+
 
     count_query = query.replace('SELECT *', 'SELECT COUNT(*)')
     cursor.execute(count_query, params)
