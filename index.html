@@ -687,22 +687,44 @@ function renderProductosScroll(productos, contenedor) {
                 const vNombre = v.nombre || v.Variante_Nombre || 'Opción ' + (vidx+1);
                 const vPrecio = v.precio || v.Precio_Final_MXN_65 || p.precio_venta_mxn || 0;
                 const vPres = v.presentacion || v.Presentacion || '';
-                const vPais = v.pais || v.Pais || 'India 🇮🇳';
+                const vBandera = v.bandera || '🌍';
+                const vPais = v.pais || v.Pais || '';
+                const vProv = v.proveedor || '';
+                const vBadge = v.badge || '';
+                const isNac = vPais.includes('México') || (vBadge && vBadge.includes('Original'));
+                const isDubai = vPais.includes('Dubái') || vPais.includes('EAU');
+                
+                let badgeClass = 'bg-slate-100 text-slate-700 border-slate-200';
+                if (isNac) badgeClass = 'bg-amber-100 text-amber-900 border-amber-300 font-bold';
+                else if (isDubai) badgeClass = 'bg-purple-100 text-purple-900 border-purple-300 font-bold';
+                else if (vBadge.includes('Turca')) badgeClass = 'bg-red-50 text-red-800 border-red-200';
+                else if (vBadge.includes('Canadiense')) badgeClass = 'bg-blue-50 text-blue-800 border-blue-200';
+                else if (vBadge.includes('Verificada')) badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+
                 return `
-                  <div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-amber-100 hover:border-amber-300 transition text-xs shadow-sm">
-                    <div>
-                      <div class="font-bold text-slate-800">${vNombre}</div>
-                      <div class="text-[11px] text-slate-400">${vPres} · ${vPais}</div>
+                  <div class="flex items-center justify-between p-3 bg-white rounded-xl border ${isNac ? 'border-amber-400 bg-amber-50/30' : 'border-slate-200'} hover:border-madrid-blue transition text-xs shadow-sm">
+                    <div class="flex items-center gap-3">
+                      <span class="text-2xl flex-shrink-0">${vBandera}</span>
+                      <div>
+                        <div class="font-bold text-slate-800 text-sm">
+                          ${vNombre}
+                        </div>
+                        <div class="text-[11px] text-slate-500 mt-0.5">
+                          ${vProv ? `<span>${vProv}</span> · ` : ''}<span>${vPres}</span>
+                        </div>
+                        ${vBadge ? `<span class="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full border ${badgeClass}">${vBadge}</span>` : ''}
+                      </div>
                     </div>
-                    <div class="text-right">
-                      <div class="font-black text-emerald-600 text-sm">${formatoMXN(vPrecio)}</div>
-                      <button onclick="comprarProductoDirecto('${vNombre.replace(/'/g, "\\'")}', '${formatoMXN(vPrecio)}')" class="text-[10px] bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2 py-0.5 rounded font-bold mt-0.5 inline-block">
+                    <div class="text-right flex-shrink-0 pl-3">
+                      <div class="font-black ${isNac ? 'text-amber-800' : 'text-emerald-600'} text-sm sm:text-base">${formatoMXN(vPrecio)}</div>
+                      <button onclick="comprarProductoDirecto('${vNombre.replace(/'/g, "\\'")}', '${formatoMXN(vPrecio)}')" class="text-xs bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 py-1 rounded-lg mt-1 inline-block shadow-sm transition">
                         Cotizar
                       </button>
                     </div>
                   </div>
                 `;
               }).join('')}
+
             </div>
           </div>
         `;
